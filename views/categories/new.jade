@@ -1,0 +1,19 @@
+.page
+
+h2 Add Category JSON
+p
+	form(method='post', action='/categories.json')
+		.item
+		label name:
+		input( name='category[name]', '', type='text' )
+		.item
+		label picture:
+		input( name='category[picture]', '', type='text' )
+		.item
+		label parent_id:
+		input( name='category[parent_id]', '', type='text' )
+		
+		.Item
+		Label Current user: #{currentUser}
+		.item
+		button( type='submit') Add

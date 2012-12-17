@@ -1,0 +1,45 @@
+extends layout
+
+block content
+	#category-page
+		.container
+			.row
+				.span3
+					ul.span3.nav.nav-tabs.nav-stacked.cat-menu
+						- if( curcat.parent_id )
+							li: a(href='/categories/#{curcat.parent_id}') ..
+						- for sub in subcat
+							li: a(href='/categories/#{sub._id}')= sub.name
+				.span9
+					ul.breadcrumb
+						li
+							a(href='/') Головна
+							span.divider /
+						li.active= curcat.name
+					legend= curcat.name
+						small &nbsp; всього #{items.length} речей
+					form.form-inline	
+						span.help-inline кількість елементів на сторінці &nbsp;&nbsp;
+						select.span1
+							option(value='5') 5
+							option(value='10') 10
+							option(value='50') 50
+					- for item in items
+						mixin item_widget(item)
+					.clr
+					.pagination.pagination-centered
+						ul
+							li: a(href='#') <<
+							li: a(href='#') 1
+							li: a(href='#') 2
+							li: a(href='#') 3
+							li: a(href='#') 4
+							li: a(href='#') >>
+
+mixin item_widget(item)
+	section.item
+		img.pull-left(src='/i/lots/#{item.picture}', alt='#{item.picture}')
+		.span6.pull-right
+			a(href='/items/#{item._id}'): h3= item.name
+			p= item.description
+		.clr

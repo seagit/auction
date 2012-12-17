@@ -1,0 +1,34 @@
+extends layout
+
+block content
+	#home-page
+		.whole-width-container.main-cat-wrapper
+			.container
+				.row
+					- for (var i = 0 ; i < 6 ; i++)
+						.span2
+							a.text-center.main-cat(href='/categories/#{categories[i]._id}')
+								img.img-circle(src='/i/cats/#{categories[i].picture}', alt='#{categories[i].name}')
+								= categories[i].name
+				.row
+					- for (var i = 6 ; i < 12 ; i++)
+						.span2
+							a.text-center.main-cat(href='/categories/#{categories[i]._id}')
+								img.img-circle(src='/i/cats/#{categories[i].picture}', alt='#{categories[i].name}')
+								= categories[i].name
+		.container
+			.row
+				.span12
+					.jcarousel
+						#ex-prod
+							a: img(src='/i/lots/wificar.jpg')
+							a: img(src='/i/lots/ebookreader.jpg')
+							a: img(src='/i/lots/kedu.jpg')
+							a: img(src='/i/lots/ochki.jpg')
+							a: img(src='/i/lots/gonki.jpg')
+							a: img(src='/i/lots/cap.jpg')
+							a: img(src='/i/lots/kosheljok.jpg')
+							a: img(src='/i/lots/girya.jpg')
+						.clr
+						a#prev-carousel(href='#')
+						a#next-carousel(href='#')

@@ -1,0 +1,21 @@
+.page
+p
+	a.button(href='/users/new') Register
+p	
+	a.button(href='/dev') to Development tools
+p	
+	script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js')	
+	script function logout() { $.ajax({url: 'logout', type: 'DELETE', success: function(){console.log('del ajax is successful');}});}
+	button(onClick= 'logout()') logout
+h2 Log In	
+form(method='post', action='/login')
+	.item
+		label Email:
+		input(name='user[email]', value=user.email || '')
+	.item
+		label Password:
+		input(name='user[password]', value=user.password || '', type='password')
+	.item
+		input(type='submit', value='Log In')
+	
+	

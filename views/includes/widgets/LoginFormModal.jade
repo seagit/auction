@@ -1,0 +1,32 @@
+.modal-header
+	button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+	h3#obminLoginFormLabel Зареєструватись або увійти
+.modal-body
+	.row
+		.span3
+			legend Для новеньких:
+			form
+				label email
+				input(type='email')
+				label Пароль
+				input(type='password')
+				label Підтвердити пароль
+				input(type='password')
+				label Ім'я
+				input(type='text')
+		.span3.pull-right
+			legend Для зареєстрованих:
+			form(action='/login', method='POST')
+				label email
+				input(type='text', name='email')
+				label Пароль
+				input(type='password', name='password')
+				a.btn.btn-link  Забули пароль ?
+				div
+					label(for='remember_me') Remember me:
+					input#remember_me(type='checkbox', name='remember_me')
+				button.btn.btn-primary(type='submit') Увійти
+
+.modal-footer
+	button.btn(data-dismiss='modal', aria-hidden='true') Close
+	button.btn.btn-primary Login

@@ -1,0 +1,233 @@
+.login-trigger {
+  margin-top: 18px;
+}
+.logout-trigger {
+  margin-top: 18px;
+}
+.user-name {
+  margin-top: 18px;
+}
+.text-center {
+  text-align: center;
+}
+.main-cat {
+  display: block;
+  width: 140px;
+}
+.main-cat-wrapper {
+  background-color: #eee;
+  padding: 18px 0 0;
+  border-top: 1px solid #d4d4d4;
+  border-bottom: 1px solid #d4d4d4;
+}
+.main-cat-wrapper .row {
+  margin-bottom: 18px;
+}
+.jcarousel {
+  position: relative;
+  padding: 18px 0 0;
+}
+.jcarousel a {
+  float: left;
+  display: block;
+  margin: 0 3px;
+}
+a#prev-carousel,
+a#next-carousel {
+  background: url("i/strelki.png") no-repeat transparent;
+  width: 18px;
+  height: 28px;
+  display: block;
+  position: absolute;
+  top: 79px;
+}
+a#prev-carousel {
+  left: -25px;
+  background-position: 0 0;
+}
+a#next-carousel {
+  right: -22px;
+  background-position: -18px 0;
+}
+/*****************************
+ * additions to bootstrap
+ * **************************/
+.navbar-text {
+  text-align: center;
+}
+/*****************************
+ * Category page
+ * **************************/
+.item {
+  margin-bottom: 12px;
+}
+.cat-menu {
+  position: fixed;
+}
+/*****************************
+ * User page
+ * **************************/
+#user-page {
+  width: 800px;
+  margin: 0 auto;
+}
+#user-page .user-ava {
+  float: left;
+  width: 200px;
+  margin-right: 24px;
+}
+#user-page .user-ava img {
+  width: 200px;
+  height: 200px;
+}
+#user-page .user-info {
+  float: right;
+  width: 550px;
+}
+#user-page section.lot-admin {
+  width: 754px;
+  height: 90px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
+}
+#user-page section.lot-admin img.lot-image {
+  float: left;
+  width: 90px;
+  height: 90px;
+  margin-right: 24px;
+}
+#user-page section.lot-admin h3.lot-title {
+  float: left;
+  width: 640px;
+  height: 35px;
+  color: #666;
+}
+#user-page section.lot-admin .lot-actions {
+  float: left;
+  width: 640px;
+}
+#user-page section.lot-admin .lot-actions a {
+  display: inline-block;
+  margin-right: 18px;
+}
+/****************************
+ *  Lot page
+ * *************************/
+#lot-page {
+  width: 800px;
+  margin: 0 auto;
+}
+#lot-page .top-left {
+  float: left;
+  width: 200px;
+  margin-right: 24px;
+}
+#lot-page .top-left img.main-image {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 24px;
+}
+#lot-page .top-left .user-info {
+  width: 174px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  background-color: #ffdead;
+}
+#lot-page .top-right {
+  float: right;
+  width: 576px;
+}
+#lot-page .top-right h1.lot-title {
+  font-size: 24px;
+  margin-bottom: 18px;
+  color: #666;
+}
+#lot-page .top-right h3.value {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #333;
+}
+#lot-page .top-right .lot-desc {
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
+}
+#lot-page .top-right .lot-wishes {
+  padding: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
+}
+#lot-page .top-right h5.desc-title,
+#lot-page .top-right h5.wishes-title {
+  font-size: 16px;
+  margin-left: -6px;
+  color: #666;
+}
+#lot-page .bottom-left {
+  float: left;
+  width: 200px;
+  margin-right: 24px;
+}
+#lot-page .bottom-right {
+  float: right;
+  width: 576px;
+}
+#lot-page .bottom-right h3.disc-title {
+  margin-bottom: 18px;
+  font-size: 21px;
+  color: #6a5acd;
+}
+#lot-page .bottom-right .discussion article.offer {
+  float: left;
+  width: 450px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e6e6fa;
+  background-color: #87cefa;
+  -webkit-border-radius: 12px;
+}
+#lot-page .bottom-right .discussion article.response {
+  float: right;
+  width: 450px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e6e6fa;
+  background-color: #87cefa;
+  -webkit-border-radius: 12px;
+}
+.clr {
+  clear: both;
+}
+/****************************
+ *  Footer
+ * *************************/
+.main-footer {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 2px solid #d4d4d4;
+}
+.copyright {
+  float: left;
+}
+.counters {
+  float: right;
+}
+/***************************
+ * For development
+ * ************************/
+.main-menu-dev {
+  width: 800px;
+  margin-bottom: 30px;
+}
+.main-menu-dev a {
+  display: inline-block;
+  padding: 12px;
+  margin: 0 66px;
+  color: #6a5acd;
+  background-color: #87cefa;
+  text-decoration: none;
+  -webkit-border-radius: 12px;
+}

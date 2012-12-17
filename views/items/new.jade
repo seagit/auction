@@ -1,0 +1,39 @@
+.page
+a.button(href='/dev') Development tools	
+h2 Add Item (redirect to HTML)
+p
+	form(method='post', action='/items')
+		.item
+		label name:
+		input( name='item[name]', '', type='text' )
+		.item
+		label description:
+		input( name='item[description]', '', type='text' )
+		.item
+		label category_id:
+		input( name='item[category_id]', '', type='text' )
+		
+		.Item
+		Label Current user: #{currentUser}
+		.item
+		button( type='submit') Add
+
+h2 Add Item (JSON)
+p
+	form(method='post', action='/items.json')
+		.item
+		label name:
+		input( name='item[name]', value='', type='text' )
+		.item
+		label description:
+		input( name='item[description]', value='', type='text' )
+		.item
+		label category_id:
+		input( name='item[category_id]', value='', type='text' )
+		
+		.Item
+		Label Current user: #{currentUser}
+		.item
+		button( type='submit') Add
+		
+		

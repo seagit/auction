@@ -1,0 +1,30 @@
+section.login-user.container
+	.row	
+		section.social-buttons.pull-right
+			a.btn.btn-link.vk-soc(href='#'): img(src='/i/fb_icon.png', alt='f')
+			a.btn.btn-link.fb-soc(href='#'): img(src='/i/vk_icon.png', alt='VK')
+		if currentUser
+			a#logout-trigger.pull-right.logout-trigger(href='javascript:void(0);') Logout&nbsp;&nbsp;&nbsp;&nbsp;
+			p.pull-right.user-name= currentUser
+				span &nbsp;&nbsp;&nbsp;&nbsp
+		else
+			a.pull-right.login-trigger(href='#loginForm', role='button', data-toggle='modal') Login/Register
+			#loginForm.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='obminLoginFormLable', aria-hidden='true', data-show='false')
+				include widgets/LoginFormModal
+	.navbar
+		.navbar-inner
+			.container
+				a.brand(href='/') Vse na Vse
+				form.navbar-search.pull-left
+					input#search-field.search-query.span3(type='text', placeholder='Я хочу')
+				ul.nav
+					li.span2
+						p.navbar-text &nbsp;шукати в:&nbsp;
+					li.dropdown
+						a.dropdown-toggle#categoryd(role='button', data-toggle='dropdown', data-target='#', href='#') Категорія
+							b.caret
+						ul.dropdown-menu(role='menu',aria-labelledby='categoryd')
+							- for cat in categories
+								li: a(href='/categories/#{cat._id}')= cat.name
+					li.span3
+						a.pull-right(href='/search') &nbsp;&nbsp;[Розширений пошук]

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="test categories.js" errors="0" tests="1" failures="0" time="0.05" timestamp="2012-12-17T01:53:40">
+  <testcase classname="test categories.js" name="refresh" time="0.05"></testcase>
+</testsuite>
+</testsuites>
