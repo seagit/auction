@@ -11,6 +11,12 @@ section.login-user.container
 			a.pull-right.login-trigger(href='#loginForm', role='button', data-toggle='modal') Login/Register
 			#loginForm.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='obminLoginFormLable', aria-hidden='true', data-show='false')
 				include widgets/LoginFormModal
+		-if (user)
+			p= user
+		-else
+			p 123
+		- if (flash.info)
+			p= flash.info
 	.navbar
 		.navbar-inner
 			.container

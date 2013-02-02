@@ -30,4 +30,26 @@ $(document).ready(function(){
             }
         });
     });
+
+	$('#lg-form').ajaxForm(function(data) {
+		if(data.status == 'OK') {
+			$('#loginForm').modal('hide');
+		} else {
+			$('.err-lg').fadeIn().html(data.msg).delay(5000).fadeOut();
+		}
+
+	})
 });
+
+var Vguser = Backbone.Model.extend({
+	id:'50b27f774747251109000004',
+	loggedin: undefined,
+	firstName:'Noname user',
+	isAdmin:false,
+	urlRoot: '/users'
+});
+
+var cur_user = new Vguser();
+console.log(cur_user.url());
+cur_user.fetch();
+cur_user.set("name", "555");

@@ -30,12 +30,12 @@ module.exports = function(app)
 				req.session.user_id = user.id;
 	            req.session.user_name = user.name;
 				req.currentUser = user;
-				res.redirect('/'); //TODO : stay on the current page !!!
+				res.send({status: 'OK', msg: 'login successful'}); //TODO : stay on the current page !!!
 				//res.render('users/user.jade', {currentUser: user, user: user});
 			} else {
 				console.log("Invalid user. Incorrect credentials");
 				//TODO : open login modal form
-				//res.redirect('/login');
+				res.send({status: 'ERR', msg: 'Пароль або користувач хибний'});
 			}
 	  }); 
 	});
@@ -58,12 +58,13 @@ module.exports = function(app)
 	app.get('/logout', loadUser, function(req, res) {
 		console.log("try to logout...");
 		if (req.session) {
+			req.flash('info', 'logout ok');
 			console.log("logout user: " + req.currentUser.email);
 			var currUser =  req.currentUser.email;
 			LoginToken.remove({ email: currUser }, function() {});
 			res.clearCookie('logintoken');
 			req.session.destroy(function() {});
-			res.send({msg: 'Logout OK', currentUser: currUser});
+			res.send({status: 'OK', msg: 'Ви успішно вийшли', currentUser: currUser});
 		}
 	});
 
@@ -153,7 +154,8 @@ module.exports = function(app)
 					break;
 
 					default:
-						res.render('users/user.jade', {currentUser: user, user: user});
+						//res.render('users/user.jade', {currentUser: user, user: user});
+						res.send(user.toObject());
 				}	
 			} else {
 				//????

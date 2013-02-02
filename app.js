@@ -1,11 +1,14 @@
 var express = require('express')
+	,everyauth = require('everyauth')
 	,connect = require('connect')
 	,jade = require('jade')
 	,http 	= require('http')
 	,path 	= require('path')
 	,SessionStore = require('connect-mongo')(express)
 	,db = require('./db')();
-	
+
+everyauth.debug = true;
+
 //Express
 var app = express();
 
@@ -54,6 +57,13 @@ db.on('open', function () {
 			  db: 'auction'
 			})
 		}));
+		app.use(require('connect-flash')());
+		// Expose the flash function to the view layer
+		app.use(function(req, res, next) {
+			res.locals.flash = function() { return req.flash() };
+			next();
+		})
+		app.use(everyauth.middleware(app));
 		app.use(app.router);
 		app.use(require('stylus').middleware(__dirname + '/public'));
 		app.use(express.static(path.join(__dirname, 'public')));
