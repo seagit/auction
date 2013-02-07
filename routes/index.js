@@ -10,7 +10,12 @@ module.exports = function(app)
 		
 	//main page	
 	app.get('/', function(req, res) {
-		res.render('index', { title: 'Exchange auction', categories: Categories.main, currentUser: req.session.user_name });		
+		res.render('index', { title: 'Exchange auction',
+							categories: Categories.main,
+							currentUser: req.session.user_name,
+							uid: req.session.user_id
+							/*,
+							hasToBeLoggedIn: 'yes'*/});
 	});
 	//development
 	app.get('/dev', function(req, res) {
@@ -30,7 +35,7 @@ module.exports = function(app)
 				req.session.user_id = user.id;
 	            req.session.user_name = user.name;
 				req.currentUser = user;
-				res.send({status: 'OK', msg: 'login successful'}); //TODO : stay on the current page !!!
+				res.send({status: 'OK', msg: 'login successful', uid: user.id}); //TODO : stay on the current page !!!
 				//res.render('users/user.jade', {currentUser: user, user: user});
 			} else {
 				console.log("Invalid user. Incorrect credentials");
