@@ -14,8 +14,7 @@ module.exports = function(app)
 							categories: Categories.main,
 							currentUser: req.session.user_name,
 							uid: req.session.user_id
-							/*,
-							hasToBeLoggedIn: 'yes'*/});
+							});
 	});
 	//development
 	app.get('/dev', function(req, res) {
@@ -156,11 +155,15 @@ module.exports = function(app)
 				switch (req.params.format) {
 					case 'json':
 						res.send(user.toObject());//send data without security data ???
-					break;
+						break;
 
 					default:
-						//res.render('users/user.jade', {currentUser: user, user: user});
-						res.send(user.toObject());
+						res.render('showuser.jade', {
+										currentUser: user,
+										user: user,
+										uid: req.session.user_id
+						});
+						//res.send(user.toObject());
 				}	
 			} else {
 				//????
@@ -269,7 +272,7 @@ module.exports = function(app)
 	});
 	//read
 	app.get('/items/:id.:format?', function(req, res, next) {
-		Items.findOne({_id: req.params.id}, function(err, item) {
+		Items.findById(req.params.id, function(err, item) {
 			if (!item) {
 				return next(new NotFound('Item is not found'));
 			}	
@@ -278,7 +281,8 @@ module.exports = function(app)
 					res.send(item.toObject());
 					break;
 				default:
-					res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+					console.log(item);
+					res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: [], uid: req.session.user_id});
 			}
 		});
 	});
@@ -290,11 +294,11 @@ module.exports = function(app)
 			}	
 			switch (req.params.operation) {
 				case 'edit':
-					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: [], uid: req.session.user_id});
 					break;
 				
 				default:
-					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: [], uid: req.session.user_id});
 			}
 		});
 	});
@@ -425,7 +429,14 @@ module.exports = function(app)
 				var search_arr = subcat_ids.concat(category._id);
 				Items.find({category_id:{$in:search_arr}}, function (err, items) {
 					if (err) return next(new NotFound('Items not found'));
-					res.render('category', { currentUser:req.session.user_name, categories:[], subcat:subcat, curcat:category, items:items });
+					res.render('category', {
+						currentUser:req.session.user_name,
+						categories:[],
+						subcat:subcat,
+						curcat:category,
+						items:items,
+						uid: req.session.user_id
+					});
 				});
 			});
 			//res.send(category.toObject());

@@ -1,6 +1,8 @@
 $(document).ready(function(){
 	var Vguser = Backbone.Model.extend({
-		urlRoot: '/users'
+		url: function() {
+			return '/users/' + this.get('id') + '.json';
+		}
 	});
 
 	var LoginStatusV = LoginStatusV = Backbone.View.extend({
@@ -85,6 +87,16 @@ $(document).ready(function(){
 			key: "right"
 		},
 		pagination: "#pagin-cont"
+	});
+	CKEDITOR.replace('lotdesc');
+	CKEDITOR.replace('lotwish');
+	$('.add-new-lot-trigger').live('click', function() {
+		$('.lot-admin-new').slideDown();
+
+	});
+
+	$('.cancel-lot-trigger').live('click', function() {
+		$('.lot-admin-new').slideUp();
 	});
 });
 

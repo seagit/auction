@@ -6,7 +6,7 @@ section.login-user.container
 	script#login-head(type = "text/template")
 		<a id="login-trigger" href="#loginForm" role="button" data-toggle="modal">Login/Register</a>
 	script#logout-head(type = "text/template")
-		<span class="user-name"><%= name %></span>
+		<a href="/users/<%= id %>"><span class="user-name"><%= name %></span></a>
 		<a id="logout-trigger" href="javascript:void(0);">Logout</a>
 	.row	
 		section.social-buttons.pull-right

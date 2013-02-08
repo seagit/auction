@@ -116,6 +116,14 @@ a#next-carousel {
   display: inline-block;
   margin-right: 18px;
 }
+#user-page section.lot-admin-new {
+  display: none;
+  width: 754px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
+}
 /****************************
  *  Lot page
  * *************************/
