@@ -44,7 +44,7 @@ $(document).ready(function(){
 		            $("#cuid").remove();
 	                lgview.render();
 	            } else {
-		            console.warn(data.msg);
+		            console.warn(data.msg + '!');
 	            }
 
             }
