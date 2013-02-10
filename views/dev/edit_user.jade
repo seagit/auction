@@ -1,0 +1,25 @@
+div
+form(method='put', action='/users/'+ user._id)
+	.Item
+			label Name(required):
+			input( name='user[name]', value=user.name || '', type='text' )	
+	.Item
+		Label ID: #{user._id}
+	.Item
+		Label Email: #{user.email}
+	.Item
+		Label Location: #{user.location}
+	.Item
+		Label Picture: #{user.picture}
+	.Item
+		Label Current user: #{currentUser}
+
+	p
+		a.button(href='/categories/new') Add Category	
+	p
+		a.button(href='/items/new') Add Item	
+	p		
+		a.button(href='/dev') Development tools	
+	p
+	p	
+	button( type='submit') Update
