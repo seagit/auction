@@ -12,6 +12,7 @@
 	 "connect-flash": "*",
      "stylus": "*",
      "mongoose" :"*",
-	 "connect-mongo" : "*"
+	 "connect-mongo" : "*",
+	 "everyauth": "*"
   }
 }
