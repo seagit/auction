@@ -13,9 +13,15 @@
 		li: a(href='/users') All users (later need to add filter)
 	script function userByIdJSON() { location.href = '/users/'+ document.getElementById('user_id').value + ".json"}
 	script function userById() { location.href = '/users/'+ document.getElementById('user_id').value}
+	script function editUserById() { location.href = '/users/'+ document.getElementById('user_id').value+'/edit'}
+	script function delUserById() { location.href = '/users/'+ document.getElementById('user_id').value'}
+	script function updateUserById() { location.href = '/users/'+ document.getElementById('user_id').value'}
 	input(type='text', id='user_id', size='90')
 	button(onClick= 'userByIdJSON()') show user by ID	(JSON)
 	button(onClick= 'userById()') show user by ID (user.jade)
+	button(onClick= 'editUserById()') show/edit user by ID (edit_user.jade)
+	button(onClick= 'delUserById()') delete user by ID
+	button(onClick= 'updateUserById()') update user by ID
 	br	
 	br	
 	b Items	

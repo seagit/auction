@@ -13,49 +13,29 @@ module.exports = function(app)
 		res.render('index', { title: 'Exchange auction', categories: Categories.main, currentUser: req.session.user_name });		
 	});
 	//development
-	app.get('/dev', function(req, res) {
+	app.get('/dev', loadUser, function(req, res) {
 		res.render('dev', {title: 'Development`s tools'});
 	});
 	
 	// Sessions
-        /*app.get('/login', function(req, res) {
-	  res.render( 'login.jade', {currentUser: req.currentUser, user: new User()});
-	});*/
-
 	app.post('/login', function(req, res) {
 		console.log("post /login; email:"+req.body.email);
 		
 		Users.findOne({ email: req.body.email }, function(err, user) {
 			if ( user && user.authenticate(req.body.password) ) {
+				console.log("Invalid user. Incorrect credentials");
 				req.session.user_id = user.id;
 	            req.session.user_name = user.name;
 				req.currentUser = user;
-				res.redirect('/'); //TODO : stay on the current page !!!
-				//res.render('users/user.jade', {currentUser: user, user: user});
+				res.send({ status: 'OK', msg: 'login is successful', userId: user.id });
 			} else {
 				console.log("Invalid user. Incorrect credentials");
-				//TODO : open login modal form
-				//res.redirect('/login');
+				res.send({status: 'ERR', msg: 'Incorrect credentials'});
 			}
 	  }); 
 	});
 
-	/*app.del('/login', loadUser, function(req, res) {
-	
-		console.log("try to logout...");
-	  
-		if (req.session) {
-		
-			console.log("logout user: " + req.currentUser.email);
-
-			LoginToken.remove({ email: req.currentUser.email }, function() {});
-			res.clearCookie('logintoken');
-			req.session.destroy(function() {});
-		}
-		res.redirect('/login');
-	}); */
-
-	app.get('/logout', loadUser, function(req, res) {
+	app.del('/login', loadUser, function(req, res) {
 		console.log("try to logout...");
 		if (req.session) {
 			console.log("logout user: " + req.currentUser.email);
@@ -64,9 +44,12 @@ module.exports = function(app)
 			res.clearCookie('logintoken');
 			req.session.destroy(function() {});
 			res.send({msg: 'Logout OK', currentUser: currUser});
+		} else {
+			res.send({status: 'ERR', msg: 'Logout is failed'});
 		}
+		
 	});
-
+	
 	app.get('/search', function(req, res) {
 		res.render('search', {title: 'Search', currentUser:req.session.user_name, categories: Categories.all});
 	});
@@ -76,7 +59,7 @@ module.exports = function(app)
 
 		LoginToken.findOne({email: cookie.email, series: cookie.series, token: cookie.token}, (function(err, token) {
 			if (!token) {
-				res.redirect('/login');
+				res.redirect('/');
 				return;
 			}
 
@@ -91,7 +74,7 @@ module.exports = function(app)
 						next();
 					});
 				} else {
-					res.redirect('/login');
+					res.redirect('/');
 				}
 			});
 		}));
@@ -105,7 +88,7 @@ module.exports = function(app)
 					req.currentUser = user;
 					next();
 				} else {
-					res.redirect('/login');
+					res.redirect('/');
 				}
 			});
 		} else if (req.cookies.logintoken) {
@@ -113,169 +96,104 @@ module.exports = function(app)
 			authenticateFromLoginToken(req, res, next);
 		} else {
 			console.log('loadUser redirect to /login:');
-			res.redirect('/login');
+			res.redirect('/');
 		}
 	}
-	//users
-	app.get('/users/new', function(req, res) {
-		res.render('users/new.jade');
-	});
 	
-	app.post('/users.:format?', function(req, res) {
-		console.log("post /users.:format?; user.email:"+req.body.user.email);
-		Users.add(req.body.user, function(err,user){
-			if (err) {
-				console.log('error: SAVE user is failed:'+err);
-				res.render('users/new.jade', {user: user});
-			}
-		
-			console.log('Your account has been created');
-			//send email and ...
-			
-			switch (req.params.format) {
-				case 'json':
-					res.send(user.toObject());
-					break;
+	// USERS
+	
+	// page of adding new user (temporary)
+	app.get('/users/new', loadUser, function(req, res) {
+		res.render('dev/new_user.jade',{});
+	});
 
-				default:
-					res.redirect('/');
-			}
+	// post user`s data(add new user)
+	app.post('/users', loadUser, function(req, res) {
+		Users.add(req.body.user, function(err,user) {
+			// !!! add sending only public fields !!!
+			user ? res.send(user.toObject()) : res.send({ status: 'ERR', msg: err.message });
 		});
 	});
 	
+	//get page of user(in read only mode) or json
 	app.get('/users/:id.:format?', function(req, res) {
 		Users.findById(req.params.id, function(err, user) {
 			if (user) {
-				console.log('User has been found by id');
-				switch (req.params.format) {
-					case 'json':
-						res.send(user.toObject());//send data without security data ???
-					break;
-
-					default:
-						res.render('users/user.jade', {currentUser: user, user: user});
-				}	
+				req.params.format == 'json' ? res.send(user.toObject()) : res.render('dev/user.jade', {currentUser: user, user: user} );
 			} else {
-				//????
-				console.log('user '+req.params.id + ' has not been found');
-				res.redirect('/');
+				res.send( {status: 'ERR', msg: err.message} );
 			}
 		});
 	});
-	app.put('/users/:id.:format?', loadUser, function(req, res) {
-		Users.updateById(req.params.id, req.body, function(err, user) {
+		
+	// get page of user(edit mode or other)
+	app.get('/users/:id/:operation', loadUser, function(req, res) {
+		Users.findById(req.params.id, function(err, user) {
 			if (user) {
-				console.log('User '+req.params.id+' has been updated');
-				switch (req.params.format) {
-					case 'json':
-						res.send(user.toObject());
-						break;
-
-					default:
-						res.render('users/user.jade', {currentUser: user, user: user});
-				}	
+				req.params.operation == 'edit' ? res.render( 'dev/edit_user.jade', {currentUser: user, user: user} ) 
+											   : res.render( 'dev/user.jade', {currentUser: user, user: user} );
 			} else {
-				//????
-				console.log('user '+req.params.id + ' has not been updated');
-				res.redirect('/');
+				res.send({ status: 'ERR', msg: err.message });
 			}
 		});
 	});
 	
+	// put user`s data(update user)
+	app.put('/users/:id?', loadUser, function(req, res) {
+		Users.updateById(req.params.id, req.body.user, function(err, user) {
+			user ? res.send(user.toObject()) : res.send( { status: 'ERR', msg: err.message } );
+		});
+	});
+	
+	// delete user by id
 	app.del('/users/:id.:format?', loadUser, function(req, res) {
 		Users.removeById(req.params.id, function(err, user) {
-			if (user) {
-				console.log('User '+req.params.id+' has been removed');
-				switch (req.params.format) {
-					case 'json':
-						res.send(user.toObject());
-						break;
-
-					default:
-						res.render('/', {currentUser: user, user: user});
-				}	
-			} else {
-				//????
-				console.log('user '+req.params.id + ' has not been removed');
-				res.redirect('/');
-			}
+			user ? res.send(user.toObject()) : res.send( {status: 'ERR', msg: err.message} );
 		});
 	});
 	
+	//get users in json or html
 	app.get('/users.:format?', loadUser, function(req, res) {
 		Users.find({}, function(err, users) {
 			if (users) {
-				switch (req.params.format) {
-					case 'json':
-						res.send(users);
-						break;
-
-					default:
-						res.render( 'users/users.jade', {users: users});
-				}
+				req.params.format == 'json' ? res.send(users) : res.render( 'dev/users.jade', {users: users} );
 			} else {
-				res.redirect('/');//???
+				res.send( {status: 'ERR', msg: err.message} );
 			}
 		});
 	});
 	
 	//Items
 	//list
-	app.get('/items.:format?', function(req, res) {
+	app.get('/items?', function(req, res) {
 		console.log(req.query);
 		Items.find(req.query,function(err, items) {
-			if (items) {
-				switch (req.params.format) {
-					case 'json':
-						res.send(items);
-						break;
-
-					default:
-						console.log('Format not available,400');
-						res.send('Format not available', 400);
-				}
-			}
+			items ? res.send(items) : res.send( {status: 'ERR', msg: err.message} );
 		});
 	});
 	//page of creating item
 	app.get('/items/new', loadUser, function(req, res) {
 		res.render('items/new.jade', {currentUser: req.currentUser});
 	});
-	//create
-	app.post('/items.:format?', loadUser, function(req, res) {
+	//create item
+	app.post('/items', loadUser, function(req, res) {
 		var data = req.body.item;
 		data.user_id = req.currentUser.id;
 		Items.add(data, function(err,item){
-			if (err) {
-				console.log('error: SAVE item is failed: '+err);
-				res.render('items/new.jade', {currentUser: req.currentUser, item: item});
-			}
-		
-			switch (req.params.format) {
-				case 'json':
-					res.send(item.toObject());
-					break;
-				default:
-					res.redirect('/users/'+req.session.user_id);//???
-			}
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
-	//read
+	//read item or page of item (dev)
 	app.get('/items/:id.:format?', function(req, res, next) {
 		Items.findOne({_id: req.params.id}, function(err, item) {
-			if (!item) {
-				return next(new NotFound('Item is not found'));
-			}	
-			switch (req.params.format) {
-				case 'json':
-					res.send(item.toObject());
-					break;
-				default:
-					res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
-			}
-		});
+				if (!item) {
+					return next(new NotFound('Item is not found'));
+				}	
+				req.params.format == 'json' ? res.send(item.toObject()) 
+											: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+			});
 	});
-	//edit page ???
+	//page of Edit
 	app.get('/items/:id/:operation?', loadUser, function(req, res, next) {
 		Items.findById(req.params.id, function(err, item) {
 			if (!item) {
@@ -283,88 +201,48 @@ module.exports = function(app)
 			}	
 			switch (req.params.operation) {
 				case 'edit':
-					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('/dev/edit_item.jade', {currentUser:req.session.user_name, item: item, categories: []});
 					break;
 				
 				default:
-					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('/dev/item.jade', {currentUser:req.session.user_name, item: item, categories: []});
 			}
 		});
 	});
-	//edit
-	/*
-	app.put('/items/:id.:format?', loadUser, function(req, res,next) {
+	//update item
+	app.put('/items/:id', loadUser, function(req, res,next) {
 		Items.updateById(req.params.id, req.body, function(err, item) {
-			if (!item) {
-				return next(new NotFound('Item is not updated'));
-			}	
-			switch (req.params.format) {
-				case 'json':
-					res.send(item.toObject());
-					break;
-				//case 'html':
-					//break;
-				default:
-					res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
-			}
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
-	*/
+	
+	//delete item
+	app.del('/items/:id', loadUser, function(req, res,next) {
+		Items.removeById(req.params.id, function(err, item) {
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
+		});
+	});
+	
+	//Offers
 	//add offer
+	app.post('/offers', loadUser, function(req, res) {
+		var data = req.body.offer;
+		//data.user_id = req.currentUser.id;
+		//data.item_id = req.currentUser.id;
+		Offers.add(data, function(err,item){
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
+		});
+	});
+	//update offer
 	app.put('/items/:id.:format?', function(req, res,next) {
-		Items.findById(req.params.id, function(err, item) {
-			if (!item) {
-				return next(new NotFound('Item is not updated'));
-			}
-			
-			var offer = new Offer(req.body);
-			offer.item_id = req.params.id;
-			offer.user_id = req.currentUser && req.currentUser.id;
-			item.offers.push(offer);
-			
-			////
-			function itemSaveFailed(err) {
-				console.log('error: SAVE item is failed: '+err);
-				res.render('items/new.jade', {currentUser: req.currentUser, item: item});
-			}
-			item.save(function(err) {
-				if (err) {
-					return itemSaveFailed(err);
-				}
-				
-				console.log('The item with new offer has been saved');
-				/*
-				switch (req.params.format) {
-					case 'json':
-						res.send(item.toObject());
-						break;
-					default:
-						res.render('showlot.jade', {currentUser:req.session.user_name, item: item, categories: []});
-				}
-				*/
-				
-				//res.redirect('/');
-				next(new NotFound('Item is not updated'));
-				
-			});
-			////
+		Offers.updateById(req.params.id, req.body, function(err, item) {
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
 	//delete
-	app.del('/items/:id.:format?', loadUser, function(req, res,next) {
-		Items.removeById(req.params.id, function(err, item) {
-			if (!item) {
-				return next(new NotFound('Item is not removed'));
-			}	
-			switch (req.params.format) {
-				case 'json':
-					res.send(item.toObject());
-					break;
-				//case 'html':
-					//break;
-				default:
-					res.redirect('/');//???
-			}
+	app.del('/offers/:id', loadUser, function(req, res) {
+		Offers.removeById(req.params.id, function(err, offer) {
+			offer ? res.send(offer.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
 	

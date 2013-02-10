@@ -21,9 +21,10 @@ $(document).ready(function(){
 	});
 
     $(document).on('click', '#logout-trigger', function() {
+		console.log('#logout-trigger....');
         $.ajax({
-            url: '/logout',
-            type: 'GET',
+            url: '/login',
+            type: 'DELETE',
             success: function(){
                 window.location.href='/';
 	            console.log('we are here ');
@@ -31,3 +32,20 @@ $(document).ready(function(){
         });
     });
 });
+
+var Vguser = Backbone.Model.extend({   
+ id:'50b27f774747251109000004',
+ loggedin: undefined,
+ firstName:'Noname user',
+ isAdmin:true,
+ name: undefined,
+ email: undefined,
+ urlRoot: '/users'
+});
+
+var cur_user = new Vguser();
+console.log(cur_user.url());
+cur_user.fetch();
+
+
+

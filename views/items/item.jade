@@ -1,23 +1,46 @@
-div
-	Item.
-		Label Name: #{item.name}
-	.Item
-		Label ID: #{item._id}
-	.Item
-		Label CategoryId: #{item.category_id}	
-	.Item
-		Label Description: #{item.description}
-	.Item
-		Label Pictures: #{item.pictures}
-	.Item
-		Label Picture: #{item.picture}
-	.Item
-		Label isActive: #{item.isActive}		
-	.Item
-		Label UserId: #{item.user_id}	
-	.Item
-		Label Current user: #{currentUser}
-	p
-		a.button(href='/items/new') Add Item	
-	p		
-		a.button(href='/dev') Development tools	
+extends layout
+
+block content
+	#lot-page
+		section.top-left
+			//- TODO: lot images gallery widget
+			img.main-image(src='/i/lots/#{item.picture}', alt='main lot image')
+
+			user = {name:'test-user', location:'Lviv', email:'testmail@mail.com', phone:'(086) 234 56 43', _id:'12342312132342342'}
+
+			section.user-info
+				h5.user-name= user.name
+				p.location= user.location
+				p.mail= user.email
+				p.phone= user.phone
+				p= user._id
+		section.top-right
+			a.pull-right(href='javascript:void()') [Редагувати]
+			h1.lot-title= item.name
+			h3.value 100$
+			//h5.period= lot.period_formatted
+			section.lot-desc
+				h5.desc-title Опис лоту
+				p.desc= item.description
+			section.lot-wishes
+				h5.wishes-title Побажання до обміну
+				p.wishes lot wishes will be here
+		div.clr
+		section.bottom-left
+			section.ad-text
+				p Advertisment
+			section.ad-banner
+				img(src='/i/lots/kosheljok.jpg', alt='banner')
+		section.bottom-right
+			h3.disc-title Пропозиції
+			section.discussion
+				- var i = 0
+				if item.offers
+					- for topic in item.offers
+						//- TODO: should be case by type of topic : guest offer, user offer, response
+						article(class = '#{i%2 === 0 ? 'offer' : 'response'}')
+							p= topic.description
+						- i++
+				else
+					p Обговорень ще не було
+				a.pull-right(href='javascript:void()') [Запропонувати]
