@@ -10,7 +10,11 @@ module.exports = function(app)
 		
 	//main page	
 	app.get('/', function(req, res) {
-		res.render('index', { title: 'Exchange auction', categories: Categories.main, currentUser: req.session.user_name });		
+		res.render('index', { title: 'Exchange auction',
+							categories: Categories.main,
+							currentUser: req.session.user_name,
+							uid: req.session.user_id
+							});
 	});
 	//development
 	app.get('/dev', loadUser, function(req, res) {
@@ -38,6 +42,7 @@ module.exports = function(app)
 	app.del('/login', loadUser, function(req, res) {
 		console.log("try to logout...");
 		if (req.session) {
+			req.flash('info', 'logout ok');
 			console.log("logout user: " + req.currentUser.email);
 			var currUser =  req.currentUser.email;
 			LoginToken.remove({ email: currUser }, function() {});
@@ -119,7 +124,21 @@ module.exports = function(app)
 	app.get('/users/:id.:format?', function(req, res) {
 		Users.findById(req.params.id, function(err, user) {
 			if (user) {
-				req.params.format == 'json' ? res.send(user.toObject()) : res.render('dev/user.jade', {currentUser: user, user: user} );
+
+				console.log('User has been found by id');
+				switch (req.params.format) {
+					case 'json':
+						res.send(user.toObject());//send data without security data ???
+						break;
+
+					default:
+						res.render('showuser.jade', {
+										currentUser: user,
+										user: user,
+										uid: req.session.user_id
+						});
+						//res.send(user.toObject());
+				}	
 			} else {
 				res.send( {status: 'ERR', msg: err.message} );
 			}
@@ -185,13 +204,19 @@ module.exports = function(app)
 	});
 	//read item or page of item (dev)
 	app.get('/items/:id.:format?', function(req, res, next) {
-		Items.findOne({_id: req.params.id}, function(err, item) {
-				if (!item) {
-					return next(new NotFound('Item is not found'));
-				}	
-				req.params.format == 'json' ? res.send(item.toObject()) 
-											: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
-			});
+		Items.findById(req.params.id, function(err, item) {
+			if (!item) {
+				return next(new NotFound('Item is not found'));
+			}	
+			switch (req.params.format) {
+				case 'json':
+					res.send(item.toObject());
+					break;
+				default:
+					console.log(item);
+					res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: [], uid: req.session.user_id});
+			}
+		});
 	});
 	//page of Edit
 	app.get('/items/:id/:operation?', loadUser, function(req, res, next) {
@@ -296,7 +321,14 @@ module.exports = function(app)
 				var search_arr = subcat_ids.concat(category._id);
 				Items.find({category_id:{$in:search_arr}}, function (err, items) {
 					if (err) return next(new NotFound('Items not found'));
-					res.render('category', { currentUser:req.session.user_name, categories:[], subcat:subcat, curcat:category, items:items });
+					res.render('category', {
+						currentUser:req.session.user_name,
+						categories:[],
+						subcat:subcat,
+						curcat:category,
+						items:items,
+						uid: req.session.user_id
+					});
 				});
 			});
 			//res.send(category.toObject());

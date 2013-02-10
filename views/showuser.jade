@@ -1,0 +1,56 @@
+extends layout
+
+block content
+	#user-page
+		div.user-ava
+			if user.photo != ''
+				img(src=#{user.photo}, alt='avatar')
+			else
+				img(src='/stylesheets/i/dummyava.png', alt='dummy avatar')
+		div.user-info
+			h1= user.name
+			div.user-meta
+				p= user._id
+				p= user.email
+				p= user.phone
+				p= user.location
+				p= user.photo
+		div.clr
+
+		a.add-new-lot-trigger(href="javascript:void(0)").pull-right [Додати новий лот]
+		div.clr
+		//- object lots array imitation
+		lots = [{id:'50b53dbe9e06216217000006', main_image:'/stylesheets/i/iphone.jpg', name:'iphone'},{id:'2', main_image:'/stylesheets/i/samsung.jpg', name:'samsung'},{id:'3', main_image:'/stylesheets/i/motorola.jpg', name:'motorola'}]
+		//- end of object
+		section.lot-admin-new
+			form
+				fieldset
+					legend Створення нового лоту
+					label Назва лоту
+					input.lot-name(type="text")
+					br
+					p.lot-desc-title Опис лоту
+					textarea.lot-desc(name="lotdesc")
+					br
+					p.lot-wish-title Побажання до обміну
+					textarea.lot-wish(name="lotwish")
+					br
+					label Категорія лоту
+					select.lot-category
+						option(value="main") Головна
+					label Зображення лоту
+					input.lot-name(type="file")
+					a.create-lot-trigger.btn.btn-primary Створити
+					a.cancel-lot-trigger.btn.btn-warning Скасувати
+		- for lot in lots
+			section.lot-admin
+				img.lot-image(src='#{lot.main_image}', alt='lot image')
+				a(href='/items/' + lot.id)
+					h3.lot-title= lot.name
+				div.lot-actions
+					a(href='/items/start/' + lot.id) start exchange
+					a(href='/items/stop/' + lot.id) stop exchange
+					a(href='/items/done/' + lot.id) exchanged
+					a(href='/items/add-photo/' + lot.id) add photo
+					a(href='/items/edit/' + lot.id) edit
+					a(href='/items/del/' + lot.id) delete

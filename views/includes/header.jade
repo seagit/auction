@@ -1,16 +1,22 @@
 section.login-user.container
+	- if (locals.hasToBeLoggedIn)
+		input#has-to-be-logged-in(type='hidden', value="yes")
+	- if (locals.uid)
+		input#cuid(type='hidden', value="#{uid}")
+	script#login-head(type = "text/template")
+		<a id="login-trigger" href="#loginForm" role="button" data-toggle="modal">Login/Register</a>
+	script#logout-head(type = "text/template")
+		<a href="/users/<%= id %>"><span class="user-name"><%= name %></span></a>
+		<a id="logout-trigger" href="javascript:void(0);">Logout</a>
 	.row	
 		section.social-buttons.pull-right
-			a.btn.btn-link.vk-soc(href='#'): img(src='/i/fb_icon.png', alt='f')
-			a.btn.btn-link.fb-soc(href='#'): img(src='/i/vk_icon.png', alt='VK')
-		if currentUser
-			a#logout-trigger.pull-right.logout-trigger(href='javascript:void(0);') Logout&nbsp;&nbsp;&nbsp;&nbsp;
-			p.pull-right.user-name= currentUser
-				span &nbsp;&nbsp;&nbsp;&nbsp
-		else
-			a.pull-right.login-trigger(href='#loginForm', role='button', data-toggle='modal') Login/Register
-			#loginForm.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='obminLoginFormLable', aria-hidden='true', data-show='false')
-				include widgets/LoginFormModal
+			a.btn.btn-link.fb-soc(href='/auth/facebook'): img(src='/i/fb_icon.png', alt='f')
+			a.btn.btn-link.vk-soc(href='/auth/vkontakte'): img(src='/i/vk_icon.png', alt='VK')
+		section#lgi-lgo.pull-right
+		#loginForm.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='obminLoginFormLable', aria-hidden='true', data-show='false')
+			include widgets/LoginFormModal
+		- if (flash.info)
+			p= flash.info
 	.navbar
 		.navbar-inner
 			.container

@@ -1,11 +1,58 @@
 var express = require('express')
+	,everyauth = require('everyauth')
 	,connect = require('connect')
 	,jade = require('jade')
 	,http 	= require('http')
 	,path 	= require('path')
 	,SessionStore = require('connect-mongo')(express)
 	,db = require('./db')();
-	
+
+everyauth.debug = true;
+everyauth.facebook
+	.appId('424733187608905')
+	.appSecret('9ff74c70276c16452807c2a966f71b69')
+	.handleAuthCallbackError( function (req, res) {
+		// If a user denies your app, Facebook will redirect the user to
+		// /auth/facebook/callback?error_reason=user_denied&error=access_denied&error_description=The+user+denied+your+request.
+		// This configurable route handler defines how you want to respond to
+		// that.
+		// If you do not configure this, everyauth renders a default fallback
+		// view notifying the user that their authentication failed and why.
+	})
+	.findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
+		// find or create user logic goes here
+	})
+	.redirectPath('/');
+
+everyauth.vkontakte
+	.appId('3403773')
+	.appSecret('0Tt4BcLG1ggW9FVdjkoP')
+	.scope('photo')
+	.findOrCreateUser( function (session, accessToken, accessTokenExtra, vkUserMetadata) {
+		// find or create user logic goes here
+		// Return a user or Promise that promises a user
+		// Promises are created via
+		//     var promise = this.Promise();
+		// No need to fetch session from cookie. It already was fetched for you and is available via the incoming `session` parameter
+
+		//session.whatever = 'foo'; // Just work directly with session's accessors
+		// These assignments should be persisted for you automatically because of the way connect.session and connect-mongodb work together
+
+		/*var userPromise = this.Promise(); // Remember, the point of this is to return a user object or user promise
+		someMongoApi.collection('users').findOne({fbId: fbUserMetadata.id}, function (err, user) {
+			if (err) return userPromise.fail(err);
+			if (user) return userPromise.fulfill(user);
+			// If we don't find a user, create one
+			var userData = userDataFromFbMetadata(fbUserMetadata);
+			someMongoApi.collection('users').insert(userData, function (err, createdUser) {
+				if (err) return userPromise.fail(err);
+				return userPromise.fulfill(createdUser);
+			});
+		});
+		return userPromise;  */
+	})
+	.redirectPath('/');
+
 //Express
 var app = express();
 
@@ -54,6 +101,13 @@ db.on('open', function () {
 			  db: 'auction'
 			})
 		}));
+		app.use(require('connect-flash')());
+		// Expose the flash function to the view layer
+		app.use(function(req, res, next) {
+			res.locals.flash = function() { return req.flash() };
+			next();
+		})
+		app.use(everyauth.middleware(app));
 		app.use(app.router);
 		app.use(require('stylus').middleware(__dirname + '/public'));
 		app.use(express.static(path.join(__dirname, 'public')));

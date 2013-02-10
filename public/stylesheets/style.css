@@ -1,8 +1,12 @@
-.login-trigger {
+#lgi-lgo {
   margin-top: 18px;
 }
-.logout-trigger {
-  margin-top: 18px;
+#logout-trigger {
+  padding-left: 24px;
+}
+.err-lg {
+  color: #f00;
+  margin-top: 12px;
 }
 .user-name {
   margin-top: 18px;
@@ -111,6 +115,14 @@ a#next-carousel {
 #user-page section.lot-admin .lot-actions a {
   display: inline-block;
   margin-right: 18px;
+}
+#user-page section.lot-admin-new {
+  display: none;
+  width: 754px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
 }
 /****************************
  *  Lot page
