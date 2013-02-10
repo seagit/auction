@@ -10,11 +10,7 @@ module.exports = function(app)
 		
 	//main page	
 	app.get('/', function(req, res) {
-		res.render('index', { title: 'Exchange auction',
-							categories: Categories.main,
-							currentUser: req.session.user_name,
-							uid: req.session.user_id
-							});
+		res.render('index', { title: 'Exchange auction', categories: Categories.main, currentUser: req.session.user_name });		
 	});
 	//development
 	app.get('/dev', loadUser, function(req, res) {
@@ -27,28 +23,26 @@ module.exports = function(app)
 		
 		Users.findOne({ email: req.body.email }, function(err, user) {
 			if ( user && user.authenticate(req.body.password) ) {
-				console.log("Invalid user. Incorrect credentials");
 				req.session.user_id = user.id;
 	            req.session.user_name = user.name;
 				req.currentUser = user;
-				res.send({ status: 'OK', msg: 'login is successful', userId: user.id });
+				res.send({ status: 'OK', msg: 'login is successful', uid: user.id });
 			} else {
 				console.log("Invalid user. Incorrect credentials");
 				res.send({status: 'ERR', msg: 'Incorrect credentials'});
 			}
 	  }); 
 	});
-
+	
 	app.del('/login', loadUser, function(req, res) {
 		console.log("try to logout...");
 		if (req.session) {
-			req.flash('info', 'logout ok');
 			console.log("logout user: " + req.currentUser.email);
 			var currUser =  req.currentUser.email;
 			LoginToken.remove({ email: currUser }, function() {});
 			res.clearCookie('logintoken');
 			req.session.destroy(function() {});
-			res.send({msg: 'Logout OK', currentUser: currUser});
+			res.send({status: 'OK', msg: 'Logout OK', currentUser: currUser});
 		} else {
 			res.send({status: 'ERR', msg: 'Logout is failed'});
 		}
@@ -124,21 +118,21 @@ module.exports = function(app)
 	app.get('/users/:id.:format?', function(req, res) {
 		Users.findById(req.params.id, function(err, user) {
 			if (user) {
-
-				console.log('User has been found by id');
-				switch (req.params.format) {
-					case 'json':
-						res.send(user.toObject());//send data without security data ???
-						break;
-
-					default:
-						res.render('showuser.jade', {
-										currentUser: user,
-										user: user,
-										uid: req.session.user_id
-						});
-						//res.send(user.toObject());
-				}	
+				var user_items;
+				Items.find({user_id: user.id}, function(err, items) {
+					if (items) {
+						user_items = items;
+					}	
+					
+					console.log(user_items);
+				
+					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
+						currentUser: user,
+						user: user,
+						uid: req.session.user_id,
+						lots: user_items
+					});
+				});
 			} else {
 				res.send( {status: 'ERR', msg: err.message} );
 			}
@@ -196,27 +190,24 @@ module.exports = function(app)
 	});
 	//create item
 	app.post('/items', loadUser, function(req, res) {
+		
+		console.log(req.files.item.picture);
+		console.log(req.currentUser);
 		var data = req.body.item;
-		data.user_id = req.currentUser.id;
+		data.user_id = req.currentUser._id;
 		Items.add(data, function(err,item){
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
 	//read item or page of item (dev)
 	app.get('/items/:id.:format?', function(req, res, next) {
-		Items.findById(req.params.id, function(err, item) {
-			if (!item) {
-				return next(new NotFound('Item is not found'));
-			}	
-			switch (req.params.format) {
-				case 'json':
-					res.send(item.toObject());
-					break;
-				default:
-					console.log(item);
-					res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: [], uid: req.session.user_id});
-			}
-		});
+		Items.findOne({_id: req.params.id}, function(err, item) {
+				if (!item) {
+					return next(new NotFound('Item is not found'));
+				}	
+				req.params.format == 'json' ? res.send(item.toObject()) 
+											: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+			});
 	});
 	//page of Edit
 	app.get('/items/:id/:operation?', loadUser, function(req, res, next) {
@@ -321,14 +312,7 @@ module.exports = function(app)
 				var search_arr = subcat_ids.concat(category._id);
 				Items.find({category_id:{$in:search_arr}}, function (err, items) {
 					if (err) return next(new NotFound('Items not found'));
-					res.render('category', {
-						currentUser:req.session.user_name,
-						categories:[],
-						subcat:subcat,
-						curcat:category,
-						items:items,
-						uid: req.session.user_id
-					});
+					res.render('category', { currentUser:req.session.user_name, categories:[], subcat:subcat, curcat:category, items:items });
 				});
 			});
 			//res.send(category.toObject());

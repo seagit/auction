@@ -65,6 +65,12 @@ $(document).ready(function(){
 		}
 
 	})
+	
+	
+	$('#new-item').ajaxForm( function(data) {
+		console.log(data);
+	})
+	
 
 	if($('#has-to-be-logged-in').val() == 'yes') {
 		$('#loginForm').modal('show');
@@ -88,8 +94,8 @@ $(document).ready(function(){
 		},
 		pagination: "#pagin-cont"
 	});
-	CKEDITOR.replace('lotdesc');
-	CKEDITOR.replace('lotwish');
+	CKEDITOR.replace('item[description]');
+	CKEDITOR.replace('item[wish]');
 	$('.add-new-lot-trigger').live('click', function() {
 		$('.lot-admin-new').slideDown();
 
