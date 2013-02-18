@@ -206,7 +206,8 @@ module.exports = function(app)
 					return next(new NotFound('Item is not found'));
 				}	
 				req.params.format == 'json' ? res.send(item.toObject()) 
-											: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+											//: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+											: res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
 			});
 	});
 	//page of Edit
