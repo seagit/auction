@@ -191,7 +191,7 @@ module.exports = function(app)
 			filter.wish = new RegExp(req.query.wish,'i');
 		}
 		//value
-		if (req.query.valueGter || req.query.valueLte) {
+		if (req.query.valueGte || req.query.valueLte) {
 			filter.value = {};
 			req.query.valueGte && (filter.value['$gte'] = +req.query.valueGte);
 			req.query.valueLte && (filter.value['$lte'] = +req.query.valueLte);
