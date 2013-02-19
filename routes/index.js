@@ -179,8 +179,26 @@ module.exports = function(app)
 	//Items
 	//list
 	app.get('/items?', function(req, res) {
-		console.log(req.query);
-		Items.find(req.query,function(err, items) {
+		var filter = {};
+		
+		//name or description
+		if (req.query.text) {
+			var regexpText = new RegExp(req.query.text,'i');
+			filter['$or'] = [ {'name': regexpText}, { 'description': regexpText} ];
+		}
+		//wish
+		if (req.query.wish) {
+			filter.wish = new RegExp(req.query.wish,'i');
+		}
+		//value
+		if (req.query.valueGter || req.query.valueLte) {
+			filter.value = {};
+			req.query.valueGte && (filter.value['$gte'] = +req.query.valueGte);
+			req.query.valueLte && (filter.value['$lte'] = +req.query.valueLte);
+		}
+				
+		console.log(filter);
+		Items.find(filter,function(err, items) {
 			items ? res.send(items) : res.send( {status: 'ERR', msg: err.message} );
 		});
 	});

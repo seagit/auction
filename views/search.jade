@@ -4,29 +4,29 @@ block content
 	.container
 		.row
 			.span12
-				form
+				form(method='get', action='/items')
 					fieldset
 						legend Розширений пошук
 						label
 							strong
 								Текст для пошуку
-						input(type='text', name='stext', placeholder='Тескт для пошуку')
+						input(type='text', name='text', placeholder='Тескт для пошуку')
 						label
 							strong
 								Пошук у побажаннях
-						input(type='text', name='wtext', placeholder='Пошук у побажаннях')
+						input(type='text', name='wish', placeholder='Пошук у побажаннях')
 						label
 							strong
 								Грошовий еквівалент
 						label від
-						input(type='text', name='vfrom', placeholder='0.00')
+						input(type='text', name='valueGte', placeholder='0.00')
 						label до
-						input(type='text', name='vto', placeholder='0.00')
+						input(type='text', name='valueLte', placeholder='0.00')
 						label
 							strong
 								Дата закінчення аукціону
 						label від
-						input(type='text', name='dfrom', placeholder='хх-хх-хххх')
+						input(type='text', name='startDate', placeholder='хх-хх-хххх')
 						label до
-						input(type='text', name='dto', placeholder='хх-хх-хххх')
+						input(type='text', name='startDate', placeholder='хх-хх-хххх')
 						button.btn.btn-large.btn-block.btn-primary(type='submit') Пошук
