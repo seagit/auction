@@ -1,4 +1,6 @@
-var util = require('util');
+var util = require('util'),
+	fs = require('fs'),
+	path = require('path');
 
 module.exports = function(app) 
 {
@@ -19,6 +21,10 @@ module.exports = function(app)
 	//development
 	app.get('/dev', loadUser, function(req, res) {
 		res.render('dev', {title: 'Development`s tools'});
+	});
+	
+	app.get('/dev/upload', loadUser, function(req, res) {
+		res.render('dev/upload', {title: 'Upload images'});
 	});
 	
 	// Sessions
@@ -105,13 +111,49 @@ module.exports = function(app)
 		}
 	}
 	
+	function copy_file(req, dir, next) {
+		var tmp_path = req.files.picture.path;
+		newName = path.resolve(dir, path.basename(tmp_path));
+				
+		// copy and delete the temporary file
+		fs.rename(tmp_path, newName, function(err) {
+			if (err) {
+				return next && next(err);
+			}
+			
+			fs.unlink(tmp_path, function() { 
+				next && next(err);
+			});
+		});
+	}
+	
+	// post avatar of user
+	//change to '/users/:id/upload'
+	app.post('/users/upload', loadUser, function(req, res) {
+		console.dir(req.files);
+		
+		copy_file(req, './public/i/users/', function(err) {
+			res.send( err ? console.log(err) : req.files.picture );
+		});
+	});
+	
+	// post item`s image
+	//change to '/items/:id/upload'
+	app.post('/items/upload', loadUser, function(req, res) {
+		console.dir(req.files);
+		
+		copy_file(req, './public/i/lots/', function(err){
+			res.send( err ? console.log(err) : req.files.picture );
+		});
+	});
+	
 	// USERS
 	
 	// page of adding new user (temporary)
 	app.get('/users/new', loadUser, function(req, res) {
 		res.render('dev/new_user.jade',{});
 	});
-
+	
 	// post user`s data(add new user)
 	app.post('/users', loadUser, function(req, res) {
 		Users.add(req.body.user, function(err,user) {

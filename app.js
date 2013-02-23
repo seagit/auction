@@ -111,6 +111,7 @@ db.on('open', function () {
 		app.use(app.router);
 		app.use(require('stylus').middleware(__dirname + '/public'));
 		app.use(express.static(path.join(__dirname, 'public')));
+		app.use(express.limit('1mb'));
 	});
 
 	app.configure('development', function(){
