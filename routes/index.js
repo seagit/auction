@@ -260,7 +260,6 @@ module.exports = function(app)
 	//create item
 	app.post('/items', loadUser, function(req, res) {
 		
-		console.log(req.files.item.picture);
 		console.log(req.currentUser);
 		var data = req.body.item;
 		data.user_id = req.currentUser._id;
