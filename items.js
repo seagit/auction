@@ -14,7 +14,7 @@ module.exports = function(itemModel) {
 			Item.find(filter,callback);
 		},
 		findOne: function(filter,callback) {
-			Item.find(filter,callback);
+			Item.findOne(filter,callback);
 		},
 		findById: function(id,callback) {
 			Item.findById(id, callback);
