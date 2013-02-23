@@ -10,7 +10,11 @@ module.exports = function(app)
 		
 	//main page	
 	app.get('/', function(req, res) {
-		res.render('index', { title: 'Exchange auction', categories: Categories.main, currentUser: req.session.user_name });		
+		res.render('index', { title: 'Exchange auction',
+							  categories: Categories.main,
+							  currentUser: req.session.user_name,
+							  uid: req.session.user_id
+							});		
 	});
 	//development
 	app.get('/dev', loadUser, function(req, res) {
@@ -50,7 +54,9 @@ module.exports = function(app)
 	});
 	
 	app.get('/search', function(req, res) {
-		res.render('search', {title: 'Search', currentUser:req.session.user_name, categories: Categories.all});
+		res.render('search', {	title: 'Search',
+								currentUser: req.session.user_name,
+								categories: Categories.main });
 	});
 	
 	function authenticateFromLoginToken(req, res, next) {
@@ -124,13 +130,15 @@ module.exports = function(app)
 						user_items = items;
 					}	
 					
+					console.log('/users/:id.:format? => user_items:');
 					console.log(user_items);
 				
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
 						currentUser: user,
 						user: user,
 						uid: req.session.user_id,
-						lots: user_items
+						lots: user_items,
+						categories: Categories.main
 					});
 				});
 			} else {
@@ -204,7 +212,8 @@ module.exports = function(app)
 	});
 	//page of creating item
 	app.get('/items/new', loadUser, function(req, res) {
-		res.render('items/new.jade', {currentUser: req.currentUser});
+		res.render('dev/new_item.jade', {currentUser: req.currentUser});
+		//res.render('items/new.jade', {currentUser: req.currentUser});
 	});
 	//create item
 	app.post('/items', loadUser, function(req, res) {
@@ -219,13 +228,18 @@ module.exports = function(app)
 	});
 	//read item or page of item (dev)
 	app.get('/items/:id.:format?', function(req, res, next) {
-		Items.findOne({_id: req.params.id}, function(err, item) {
+		Items.findById(req.params.id, function(err, item) {
 				if (!item) {
 					return next(new NotFound('Item is not found'));
 				}	
+				
 				req.params.format == 'json' ? res.send(item.toObject()) 
-											//: res.render('dev/item.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
-											: res.render('showlot.jade', {currentUser:req.session.user_name/*Fix me*/, item: item, categories: []});
+											: res.render('showlot.jade', {
+																			currentUser:req.session.user_name/*Fix me*/,
+																			item: item,
+																			categories: Categories.main,
+																			uid: req.session.user_id
+																		});
 			});
 	});
 	//page of Edit
@@ -233,14 +247,19 @@ module.exports = function(app)
 		Items.findById(req.params.id, function(err, item) {
 			if (!item) {
 				return next(new NotFound('Item is not found'));
-			}	
+			}
+			var viewData = {
+							currentUser: req.session.user_name, 
+							item: item,
+							categories: Categories.main	};
+							
 			switch (req.params.operation) {
 				case 'edit':
-					res.render('/dev/edit_item.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('dev/edit_item.jade', viewData);
 					break;
 				
 				default:
-					res.render('/dev/item.jade', {currentUser:req.session.user_name, item: item, categories: []});
+					res.render('dev/item.jade', viewData);
 			}
 		});
 	});
@@ -269,11 +288,14 @@ module.exports = function(app)
 		});
 	});
 	//update offer
-	app.put('/items/:id.:format?', function(req, res,next) {
+	/*
+	app.put('/offers/:id.:format?', function(req, res,next) {
 		Offers.updateById(req.params.id, req.body, function(err, item) {
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
+	*/
+	
 	//delete
 	app.del('/offers/:id', loadUser, function(req, res) {
 		Offers.removeById(req.params.id, function(err, offer) {
@@ -331,7 +353,14 @@ module.exports = function(app)
 				var search_arr = subcat_ids.concat(category._id);
 				Items.find({category_id:{$in:search_arr}}, function (err, items) {
 					if (err) return next(new NotFound('Items not found'));
-					res.render('category', { currentUser:req.session.user_name, categories:[], subcat:subcat, curcat:category, items:items });
+					res.render('category', { 
+											currentUser: req.session.user_name,
+											categories: Categories.main,
+											subcat:subcat,
+											curcat: category,
+											items: items,
+											uid: req.session.user_id
+											});
 				});
 			});
 			//res.send(category.toObject());
