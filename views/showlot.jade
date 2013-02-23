@@ -15,7 +15,7 @@ block content
 				p.phone= user.phone
 				p= user._id
 		section.top-right
-			a.pull-right(href='javascript:void(0);') [Редагувати]
+			a.pull-right(href='/items/#{item.id}/edit') [Редагувати]
 			h1.lot-title= item.name
 			h3.value 100$
 			//h5.period= lot.period_formatted
