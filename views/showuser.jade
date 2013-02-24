@@ -2,6 +2,23 @@ extends layout
 
 block content
 	#user-page
+		script#lot-item(type = "text/template")
+			<section class="lot-admin">
+			<img class="lot-image" src="<%= lot.picture %>" alt="lot image">
+			<a href="/items/<%= lot._id %>">
+			<h3 class="lot-title">
+			<%= lot.name %>
+			</h3>
+			</a>
+			<div class="lot-actions">
+			<a href="/items/<%= lot._id %>/start">start exchange</a>
+			<a href="/items/<%= lot._id %>/stop">stop exchange</a>
+			<a href="/items/<%= lot._id %>/done">exchanged</a>
+			<a href="/items/<%= lot._id %>/add-photo">add photo</a>
+			<a href="javascript:void(0);">edit</a>
+			<a href="/items/<%= lot._id %>/delete">delete</a>
+			</div>
+			</section>
 		div.user-ava
 			if user.photo != ''
 				img(src=#{user.photo}, alt='avatar')
@@ -32,25 +49,31 @@ block content
 					p.lot-desc-title Опис лоту
 					textarea.lot-desc(name="item[description]")
 					br
+					label Оціночна вартість
+					input.lot-value(type="number", name="item[value]")
+					br
 					p.lot-wish-title Побажання до обміну
 					textarea.lot-wish(name="item[wish]")
 					br
 					label Категорія лоту
 					select.lot-category(name="item[category_id]")
 						option(value="50b3db132bdf12cb09000010") Головна
-					label Зображення лоту
-					input.lot-name(type="file", name="item[picture]")
 					button.create-lot-trigger.btn.btn-primary(type='submit') Створити
 					a.cancel-lot-trigger.btn.btn-warning Скасувати
-		- for lot in lots
-			section.lot-admin
-				img.lot-image(src='#{lot.picture}', alt='lot image')
-				a(href='/items/' + lot._id)
-					h3.lot-title= lot.name
-				div.lot-actions
-					a(href='/items/start/' + lot._id) start exchange
-					a(href='/items/stop/' + lot._id) stop exchange
-					a(href='/items/done/' + lot._id) exchanged
-					a(href='/items/add-photo/' + lot._id) add photo
-					a(href='/items/' + lot._id + '/edit') edit
-					a(href='/items/del/' + lot._id) delete
+		section.user-lots-admin
+	script(type="text/javascript")
+		lots = !{ JSON.stringify(lots) };
+
+//		- for lot in lots
+//			section.user-lots-admin
+//				section.lot-admin
+//					img.lot-image(src='#{lot.picture}', alt='lot image')
+//					a(href='/items/' + lot._id)
+//						h3.lot-title= lot.name
+//					div.lot-actions
+//						a(href='/items/start/' + lot._id) start exchange
+//						a(href='/items/stop/' + lot._id) stop exchange
+//						a(href='/items/done/' + lot._id) exchanged
+//						a(href='/items/add-photo/' + lot._id) add photo
+//						a(href='/items/' + lot._id + '/edit') edit
+//						a(href='/items/del/' + lot._id) delete
