@@ -4,7 +4,10 @@ block content
 	#lot-page
 		section.top-left
 			//- TODO: lot images gallery widget
-			img.main-image(src='/i/lots/#{item.picture}', alt='main lot image')
+			if item.picture
+				img.main-image(src='/i/lots/#{item.picture}', alt='main lot image')
+			else
+				img.main-image(src='/i/lots/default.jpg', alt='default image')
 
 			user = {name:'test-user', location:'Lviv', email:'testmail@mail.com', phone:'(086) 234 56 43', _id:'12342312132342342'}
 

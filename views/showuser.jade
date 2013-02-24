@@ -3,10 +3,10 @@ extends layout
 block content
 	#user-page
 		div.user-ava
-			if user.photo != ''
-				img(src=#{user.photo}, alt='avatar')
+			if user.picture
+				img(src='/i/users/#{user.picture}', alt='avatar')
 			else
-				img(src='/stylesheets/i/dummyava.png', alt='dummy avatar')
+				img(src='/i/users/default.png', alt='dummy avatar')
 		div.user-info
 			h1= user.name
 			div.user-meta
@@ -44,7 +44,10 @@ block content
 					a.cancel-lot-trigger.btn.btn-warning Скасувати
 		- for lot in lots
 			section.lot-admin
-				img.lot-image(src='#{lot.picture}', alt='lot image')
+				if lot.picture
+					img.lot-image(src='/i/lots/#{lot.picture}', alt='lot image')
+				else
+					img.main-image(src='/i/lots/default.jpg', alt='default image')
 				a(href='/items/' + lot._id)
 					h3.lot-title= lot.name
 				div.lot-actions
