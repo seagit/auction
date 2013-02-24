@@ -20,10 +20,10 @@ block content
 			</div>
 			</section>
 		div.user-ava
-			if user.photo != ''
-				img(src=#{user.photo}, alt='avatar')
+			if user.picture
+				img(src='/i/users/#{user.picture}', alt='avatar')
 			else
-				img(src='/stylesheets/i/dummyava.png', alt='dummy avatar')
+				img(src='/i/users/default.png', alt='dummy avatar')
 		div.user-info
 			h1= user.name
 			div.user-meta

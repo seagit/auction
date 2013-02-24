@@ -111,9 +111,10 @@ module.exports = function(app)
 		}
 	}
 	
-	function copy_file(req, dir, next) {
-		var tmp_path = req.files.picture.path;
-		newName = path.resolve(dir, path.basename(tmp_path));
+	function copyFile(req, dir, next) {
+		var tmp_path = req.files.picture.path,
+			basename = path.basename(tmp_path),
+			newName = path.resolve(dir, basename);
 				
 		// copy and delete the temporary file
 		fs.rename(tmp_path, newName, function(err) {
@@ -122,30 +123,11 @@ module.exports = function(app)
 			}
 			
 			fs.unlink(tmp_path, function() { 
-				next && next(err);
+				next && next(err, basename);
 			});
 		});
 	}
 	
-	// post avatar of user
-	//change to '/users/:id/upload'
-	app.post('/users/upload', loadUser, function(req, res) {
-		console.dir(req.files);
-		
-		copy_file(req, './public/i/users/', function(err) {
-			res.send( err ? console.log(err) : req.files.picture );
-		});
-	});
-	
-	// post item`s image
-	//change to '/items/:id/upload'
-	app.post('/items/upload', loadUser, function(req, res) {
-		console.dir(req.files);
-		
-		copy_file(req, './public/i/lots/', function(err){
-			res.send( err ? console.log(err) : req.files.picture );
-		});
-	});
 	
 	// USERS
 	
@@ -172,9 +154,6 @@ module.exports = function(app)
 						user_items = items;
 					}	
 					
-					console.log('/users/:id.:format? => user_items:');
-					console.log(user_items);
-				
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
 						currentUser: user,
 						user: user,
@@ -226,6 +205,15 @@ module.exports = function(app)
 		});
 	});
 	
+	// Set avatar of user (!!! PUT or PATCH) 
+	app.post('/users/:id/picture', loadUser, function(req, res) {
+		copyFile(req, './public/i/users/', function(err, fileName) {
+			Users.updateById(req.params.id, { $set: { picture: fileName }}, function(err, user) {
+				res.send( err ? { status: 'ERR', msg: err.message } : user.toObject() );
+			});
+		});
+	});
+	
 	//Items
 	//list
 	app.get('/items?', function(req, res) {
@@ -263,6 +251,7 @@ module.exports = function(app)
 		console.log(req.currentUser);
 		var data = req.body.item;
 		data.user_id = req.currentUser._id;
+		data.picture = 'default.jpg';// it needs to discuss !!!
 		Items.add(data, function(err,item){
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
@@ -308,6 +297,22 @@ module.exports = function(app)
 	app.put('/items/:id', loadUser, function(req, res,next) {
 		Items.updateById(req.params.id, req.body, function(err, item) {
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
+		});
+	});
+	
+	// Set item`s image (!!! PUT or PATCH)
+	app.post('/items/:id/picture', loadUser, function(req, res) {
+		copyFile(req, './public/i/lots/', function(err, fileName){
+			Items.updateById(req.params.id, { $set: { picture: fileName }, $push: { pictures: fileName }}, function(err, item) {
+				res.send( err ? { status: 'ERR', msg: err.message } : item.toObject() );
+			});
+		});
+	});
+	
+	// Change item`s image (!!! PUT or PATCH) - "update item" is more general but it needs to discuss
+	app.put('/items/:id/change_picture', loadUser, function(req, res) {
+		Items.updateById(req.params.id, { $set: { picture: req.params.picture }}, function(err, item) {
+			res.send( err ? { status: 'ERR', msg: err.message } : item.toObject() );
 		});
 	});
 	
