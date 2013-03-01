@@ -137,7 +137,8 @@ module.exports = function(app)
 	});
 	
 	// post user`s data(add new user)
-	app.post('/users', loadUser, function(req, res) {
+	//app.post('/users', loadUser, function(req, res) {
+	app.post('/users', function(req, res) {
 		Users.add(req.body.user, function(err,user) {
 			// !!! add sending only public fields !!!
 			user ? res.send(user.toObject()) : res.send({ status: 'ERR', msg: err.message });
