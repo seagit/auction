@@ -67,9 +67,9 @@ $(document).ready(function(){
 	})
 	
 	
-	$('#new-item').ajaxForm( function(data) {
+	/*$('#new-item').ajaxForm( function(data) {
 		console.log(data);
-	})
+	})*/
 	
 
 	if($('#has-to-be-logged-in').val() == 'yes') {
@@ -96,14 +96,66 @@ $(document).ready(function(){
 	});
 	CKEDITOR.replace('item[description]');
 	CKEDITOR.replace('item[wish]');
+
 	$('.add-new-lot-trigger').live('click', function() {
-		$('.lot-admin-new').slideDown();
+		$('.lot-admin-new').slideToggle();
 
 	});
 
 	$('.cancel-lot-trigger').live('click', function() {
 		$('.lot-admin-new').slideUp();
     });
+
+	var Lot = Backbone.Model.extend({
+		url: function() {
+			return '/items/' + this.get('id') + '.json';
+		}
+	});
+
+	var Lots = Backbone.Collection.extend({
+		model: Lot
+	});
+
+	var LotView = Backbone.View.extend({
+		lotTemplate: _.template($('#lot-item').html()),
+		initialize: function() {
+			this.render();
+		},
+		render: function() {
+			this.$el.html(this.lotTemplate({lot: this.model.attributes}));
+		}
+	});
+
+	var LotsView = Backbone.View.extend({
+		el: $('.user-lots-admin'),
+		lotTemplate: _.template($('#lot-item').html()),
+		initialize: function() {
+			this.render();
+		},
+		render: function() {
+			var rch = _.reduce(
+				_.map(this.collection.models, function(elem) {
+					var lotView = new LotView({ model: elem});
+					return lotView;
+				}, this),
+				function(m, elem) {
+					return (m += elem.$el.html());
+				},
+				'',
+				this
+			);
+			this.$el.hide().html(rch).fadeIn();
+		}
+	});
+
+	if(window.lots) {
+		var AllLots = new Lots(lots);
+		var AllLotsView = new LotsView({collection: AllLots});
+	}
+
+	$('.create-lot-trigger').live(function() {
+		var newLot = '';
+	});
 });
 
 
