@@ -20,14 +20,14 @@ block content
 		section.top-right
 			a.pull-right(href='/items/#{item.id}/edit') [Редагувати]
 			h1.lot-title= item.name
-			h3.value 100$
+			h3.lot-value= item.value
 			//h5.period= lot.period_formatted
 			section.lot-desc
 				h5.desc-title Опис лоту
-				p.desc= item.description
+				p.desc!= item.description
 			section.lot-wishes
 				h5.wishes-title Побажання до обміну
-				p.wishes lot wishes will be here
+				p.wishes!= item.wish
 		div.clr
 		section.bottom-left
 			section.ad-text

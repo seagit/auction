@@ -94,8 +94,19 @@ $(document).ready(function(){
 		},
 		pagination: "#pagin-cont"
 	});
-	CKEDITOR.replace('item[description]');
-	CKEDITOR.replace('item[wish]');
+
+	if($('#user-page .lot-desc').length == 1) {
+		CKEDITOR.replace('item[description]');
+		CKEDITOR.replace('item[wish]');
+	}
+
+	function openNewLotDialog() {
+		$('.lot-admin-new').slideDown();
+	}
+
+	function closeNewLotDialog() {
+		$('.lot-admin-new').slideUp();
+	}
 
 	$('.add-new-lot-trigger').live('click', function() {
 		$('.lot-admin-new').slideToggle();
@@ -103,12 +114,16 @@ $(document).ready(function(){
 	});
 
 	$('.cancel-lot-trigger').live('click', function() {
-		$('.lot-admin-new').slideUp();
+		closeNewLotDialog();
     });
 
 	var Lot = Backbone.Model.extend({
 		url: function() {
-			return '/items/' + this.get('id') + '.json';
+			if(this.isNew()) {
+				return '/items/';
+			} else {
+				return '/items/' + this.get('id') + '.json';
+			}
 		}
 	});
 
@@ -128,9 +143,14 @@ $(document).ready(function(){
 
 	var LotsView = Backbone.View.extend({
 		el: $('.user-lots-admin'),
-		lotTemplate: _.template($('#lot-item').html()),
 		initialize: function() {
 			this.render();
+			this.collection.bind('add', function() {
+				this.render();
+			}, this);
+			this.collection.bind('remove', function() {
+				this.render();
+			}, this);
 		},
 		render: function() {
 			var rch = _.reduce(
@@ -149,12 +169,43 @@ $(document).ready(function(){
 	});
 
 	if(window.lots) {
-		var AllLots = new Lots(lots);
+		var lotsM = _.map(
+			lots, function(elem) {
+				return new Lot(elem).set('id', elem._id);
+			}
+		);
+		var AllLots = new Lots(lotsM);
 		var AllLotsView = new LotsView({collection: AllLots});
 	}
 
-	$('.create-lot-trigger').live(function() {
-		var newLot = '';
+	$('.create-lot-trigger').live('click', function() {
+		var newLotJSON = $(this).closest('form').serializeObject();
+		console.log(newLotJSON);
+		var newLotModel = new Lot(newLotJSON.item);
+		newLotModel.save(null, {
+			success: function(itemn) {
+				console.log(itemn);
+				AllLotsView.collection.push(itemn);
+				closeNewLotDialog();
+			},
+			error: function() {
+				console.err('error occurs while creating')
+			}
+		});
+	});
+
+	$('.delete-lot-trigger').live('click', function() {
+		var lot_id = $(this).data('lot-id');
+		console.log(AllLotsView.collection.first());
+		var model_to_del = AllLotsView.collection.get(lot_id);
+		model_to_del.destroy({
+			success: function() {
+				AllLotsView.collection.remove(model_to_del);
+			},
+			error: function() {
+				console.log('error occurs while deleting');
+			}
+		});
 	});
 });
 

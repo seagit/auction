@@ -4,7 +4,7 @@ block content
 	#user-page
 		script#lot-item(type = "text/template")
 			<section class="lot-admin">
-			<img class="lot-image" src="<%= lot.picture %>" alt="lot image">
+			<img class="lot-image" src="/i/lots/<%= lot.picture %>" alt="lot image">
 			<a href="/items/<%= lot._id %>">
 			<h3 class="lot-title">
 			<%= lot.name %>
@@ -16,7 +16,7 @@ block content
 			<a href="/items/<%= lot._id %>/done">exchanged</a>
 			<a href="/items/<%= lot._id %>/add-photo">add photo</a>
 			<a href="javascript:void(0);">edit</a>
-			<a href="/items/<%= lot._id %>/delete">delete</a>
+			<a href="javascript:void(0);" class="delete-lot-trigger" data-lot-id="<%= lot._id %>">delete</a>
 			</div>
 			</section>
 		div.user-ava
@@ -40,7 +40,7 @@ block content
 		//lots = [{id:'50b53dbe9e06216217000006', main_image:'/stylesheets/i/iphone.jpg', name:'iphone'},{id:'2', main_image:'/stylesheets/i/samsung.jpg', name:'samsung'},{id:'3', main_image:'/stylesheets/i/motorola.jpg', name:'motorola'}]
 		//- end of object
 		section.lot-admin-new
-			form#new-item(action='/items', method='POST')
+			form#new-item(action='', method='POST')
 				fieldset
 					legend Створення нового лоту
 					label Назва лоту
@@ -58,7 +58,7 @@ block content
 					label Категорія лоту
 					select.lot-category(name="item[category_id]")
 						option(value="50b3db132bdf12cb09000010") Головна
-					button.create-lot-trigger.btn.btn-primary(type='submit') Створити
+					button.create-lot-trigger.btn.btn-primary(type='button') Створити
 					a.cancel-lot-trigger.btn.btn-warning Скасувати
 		section.user-lots-admin
 	script(type="text/javascript")

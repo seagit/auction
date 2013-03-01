@@ -249,7 +249,8 @@ module.exports = function(app)
 	app.post('/items', loadUser, function(req, res) {
 		
 		console.log(req.currentUser);
-		var data = req.body.item;
+		var data = req.body;
+		console.log(req.body);
 		data.user_id = req.currentUser._id;
 		data.picture = 'default.jpg';// it needs to discuss !!!
 		Items.add(data, function(err,item){
@@ -317,7 +318,7 @@ module.exports = function(app)
 	});
 	
 	//delete item
-	app.del('/items/:id', loadUser, function(req, res,next) {
+	app.del('/items/:id.:format?', loadUser, function(req, res,next) {
 		Items.removeById(req.params.id, function(err, item) {
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
