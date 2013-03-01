@@ -7,52 +7,6 @@ var express = require('express')
 	,SessionStore = require('connect-mongo')(express)
 	,db = require('./db')();
 
-everyauth.debug = true;
-everyauth.facebook
-	.appId('424733187608905')
-	.appSecret('9ff74c70276c16452807c2a966f71b69')
-	.handleAuthCallbackError( function (req, res) {
-		// If a user denies your app, Facebook will redirect the user to
-		// /auth/facebook/callback?error_reason=user_denied&error=access_denied&error_description=The+user+denied+your+request.
-		// This configurable route handler defines how you want to respond to
-		// that.
-		// If you do not configure this, everyauth renders a default fallback
-		// view notifying the user that their authentication failed and why.
-	})
-	.findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
-		// find or create user logic goes here
-	})
-	.redirectPath('/');
-
-everyauth.vkontakte
-	.appId('3403773')
-	.appSecret('0Tt4BcLG1ggW9FVdjkoP')
-	.scope('photo')
-	.findOrCreateUser( function (session, accessToken, accessTokenExtra, vkUserMetadata) {
-		// find or create user logic goes here
-		// Return a user or Promise that promises a user
-		// Promises are created via
-		//     var promise = this.Promise();
-		// No need to fetch session from cookie. It already was fetched for you and is available via the incoming `session` parameter
-
-		//session.whatever = 'foo'; // Just work directly with session's accessors
-		// These assignments should be persisted for you automatically because of the way connect.session and connect-mongodb work together
-
-		/*var userPromise = this.Promise(); // Remember, the point of this is to return a user object or user promise
-		someMongoApi.collection('users').findOne({fbId: fbUserMetadata.id}, function (err, user) {
-			if (err) return userPromise.fail(err);
-			if (user) return userPromise.fulfill(user);
-			// If we don't find a user, create one
-			var userData = userDataFromFbMetadata(fbUserMetadata);
-			someMongoApi.collection('users').insert(userData, function (err, createdUser) {
-				if (err) return userPromise.fail(err);
-				return userPromise.fulfill(createdUser);
-			});
-		});
-		return userPromise;  */
-	})
-	.redirectPath('/');
-
 //Express
 var app = express();
 
@@ -130,6 +84,83 @@ db.on('open', function () {
 		console.log("Exchange auction listening on port %d, environment: %s",app.get('port'), app.settings.env);
 		console.log('Using connect %s, Express %s, Jade %s', connect.version, express.version, jade.version);
 	});
+	
+	//everyauth
+	//everyauth.helpExpress(app);
+	
+	everyauth.debug = true;
+	everyauth.facebook
+	.appId('424733187608905')
+	.scope('email')
+	.fields('id,name,email,picture')
+	.appSecret('9ff74c70276c16452807c2a966f71b69')
+	.handleAuthCallbackError( function (req, res) {
+		console.log('handleAuthCallbackError req:'+req);
+		console.log('handleAuthCallbackError res:'+res);
+	})
+	.findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
+		Users.findOne( { email: fbUserMetadata.email }, function(err, user) {
+			
+			//Data from Facebook
+			// accessToken: AAAGCSubFkUkBAGGEyCGoQJAG2TPkiH61MT2kw3YSSjxTVqZANZACkKm22ZBaMevLVY5DVo3Oi3ISCeCIzFCrAdi2Er7uRXY1ySaKnWgKAZDZD
+			// accessTokExtra: { expires: '5183505' }
+			// fbUserMetadata:{ id: '100001433488760', name: 'John', email: 'john@gmail.com', picture:{{data: {url: http://profile.fgfr.re333.jpg} }} }
+			
+			var userPromise = this.Promise();
+			
+			if (err) {
+				return userPromise.fail(err);
+			}
+			
+			if (!user) {
+				var userData = {};
+				userData.name = fbUserMetadata.name;
+				userData.email = fbUserMetadata.email;
+				userData.picture = fbUserMetadata.picture.data.url;
+				userData.token = accessToken;
+				//userData.fbData = userData;
+				app.users.add(userData, function(err,createdUser) {
+					return user ? userPromise.fulfill(createdUser) : userPromise.fail(err);
+				});
+				
+				/*
+				req.session.user_id = user.id;
+	            req.session.user_name = user.name;
+				req.currentUser = user;
+				res.send({ status: 'OK', msg: 'login is successful', uid: user.id });
+				*/
+			} 
+			
+			return userPromise.fulfill(user);
+	  }); 
+	})
+	.redirectPath('/');
+	
+	/*	
+	everyauth.everymodule.findUserById(function(userId, cb) {
+		console.log('findByUserId called');
+	});
+	*/	
+	
+	/*
+	everyauth.vkontakte
+		.appId('3403773')
+		.scope('email')
+		.fields('id,name,email')
+		.appSecret('0Tt4BcLG1ggW9FVdjkoP')
+		.scope('photo')
+		.findOrCreateUser( function (session, accessToken, accessTokenExtra, vkUserMetadata) {
+			console.log('____session');
+			console.log(session);
+			console.log('____accessToken');
+			console.log(accessToken);
+			console.log('____accessTokExtra');
+			console.log(accessTokExtra);
+			console.log('____vkUserMetadata');
+			console.log(vkUserMetadata);
+		})
+		.redirectPath('/');
+	*/
 });
 
 

@@ -55,6 +55,21 @@ function defineModels(mongoose, crypto, fn) {
 		return this._id.toHexString();
 	});
 
+	//FbData
+	FbData = new Schema({
+		email: { type: String, index: { unique: true } },
+		name:  { type: String, index: { unique: true } },
+		accessToken: String,
+		picture: String
+	});
+	
+	//vkData
+	VkData = new Schema({
+		email: { type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true } },
+		name:  { type: String, validate: [validatePresenceOf, 'a name is required'], index: { unique: true } },
+		accessToken: String,
+		picture: String
+	});
 
 	//User
 	User = new Schema({
@@ -65,7 +80,9 @@ function defineModels(mongoose, crypto, fn) {
 		location: String,
 		picture: String,
 		lastDateLogin: {type: Date},
-		isAdmin: {type : Boolean, default: false}
+		isAdmin: {type : Boolean, default: false},
+		//fbData: FbData,
+		//vkData: VkData
 	});
 
 	User.virtual('id').get(function() {
