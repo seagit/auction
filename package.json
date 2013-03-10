@@ -13,6 +13,8 @@
      "stylus": "*",
      "mongoose" :"*",
 	 "connect-mongo" : "*",
-	 "everyauth": "*"
+	 "passport": "*",
+	 "passport-facebook": "*",
+	 "passport-local": "*"
   }
 }

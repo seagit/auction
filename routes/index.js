@@ -9,106 +9,75 @@ module.exports = function(app)
 		Offers = app.offers,
 		Categories = app.categories,
 		LoginToken = app.LoginToken;
+		passport = app.passport;
 		
 	//main page	
 	app.get('/', function(req, res) {
 		res.render('index', { title: 'Exchange auction',
 							  categories: Categories.main,
-							  currentUser: req.session.user_name,
-							  uid: req.session.user_id
+							  currentUser: req.user,
+							  uid: req.user && req.user.id
 							});		
 	});
 	//development
-	app.get('/dev', loadUser, function(req, res) {
-		res.render('dev', {title: 'Development`s tools'});
+	app.get('/dev', ensureAuthenticated, function(req, res) {
+		res.render('dev', {title: 'Development`s tools', user: req.user});
 	});
 	
-	app.get('/dev/upload', loadUser, function(req, res) {
+	app.get('/dev/upload', ensureAuthenticated, function(req, res) {
 		res.render('dev/upload', {title: 'Upload images'});
 	});
 	
 	// Sessions
-	app.post('/login', function(req, res) {
-		console.log("post /login; email:"+req.body.email);
-		
-		Users.findOne({ email: req.body.email }, function(err, user) {
-			if ( user && user.authenticate(req.body.password) ) {
-				req.session.user_id = user.id;
-	            req.session.user_name = user.name;
-				req.currentUser = user;
-				res.send({ status: 'OK', msg: 'login is successful', uid: user.id });
-			} else {
-				console.log("Invalid user. Incorrect credentials");
-				res.send({status: 'ERR', msg: 'Incorrect credentials'});
-			}
-	  }); 
+	app.del('/login', ensureAuthenticated, function(req, res) {
+		console.log("try to logout...");
+		var user = req.user;
+		req.logout();
+		res.send({status: 'OK', msg: 'Logout OK', currentUser: user});
 	});
 	
-	app.del('/login', loadUser, function(req, res) {
-		console.log("try to logout...");
-		if (req.session) {
-			console.log("logout user: " + req.currentUser.email);
-			var currUser =  req.currentUser.email;
-			LoginToken.remove({ email: currUser }, function() {});
-			res.clearCookie('logintoken');
-			req.session.destroy(function() {});
-			res.send({status: 'OK', msg: 'Logout OK', currentUser: currUser});
-		} else {
-			res.send({status: 'ERR', msg: 'Logout is failed'});
+	// Passport-Local login
+	app.post('/login', passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+		function(req, res) {
+			res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
 		}
-		
+	);
+	
+	// Passport-Facebook login
+	app.get('/auth/facebook',
+	  passport.authenticate('facebook'),
+	  function(req, res){
+		console.log("The request will be redirected to Facebook for authentication, so this function will not be called.");
+	  });
+
+	// Passport-Facebook callback
+	app.get('/auth/facebook/callback', 
+		passport.authenticate('facebook', { failureRedirect: '/auth/facebook' }),
+		function(req, res) {
+			res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
+			//res.redirect('/');
+		}
+	);
+	// Passport Logout
+	app.get('/logout', function(req, res){
+		req.logout();
+		res.redirect('/');
 	});
 	
 	app.get('/search', function(req, res) {
 		res.render('search', {	title: 'Search',
-								currentUser: req.session.user_name,
+								currentUser: req.user,
 								categories: Categories.main });
 	});
 	
-	function authenticateFromLoginToken(req, res, next) {
-		var cookie = JSON.parse(req.cookies.logintoken);
-
-		LoginToken.findOne({email: cookie.email, series: cookie.series, token: cookie.token}, (function(err, token) {
-			if (!token) {
-				res.redirect('/');
-				return;
-			}
-
-			Users.findOne({ email: token.email }, function(err, user) {
-				if (user) {
-					req.session.user_id = user.id;
-					req.currentUser = user;
-
-					token.token = token.randomToken();
-					token.save(function() {
-						res.cookie('logintoken', token.cookieValue, { expires: new Date(Date.now() + 2 * 604800000), path: '/' });
-						next();
-					});
-				} else {
-					res.redirect('/');
-				}
-			});
-		}));
-	}
-	
-	function loadUser(req, res, next) {
-		if (req.session.user_id) {
-			console.log('loadUser user_id:'+req.session.user_id);
-			Users.findById(req.session.user_id, function(err, user) {
-				if (user) {
-					req.currentUser = user;
-					next();
-				} else {
-					res.redirect('/');
-				}
-			});
-		} else if (req.cookies.logintoken) {
-			console.log('loadUser logintoken:'+req.cookies.logintoken + '; => authenticateFromLoginToken');
-			authenticateFromLoginToken(req, res, next);
-		} else {
-			console.log('loadUser redirect to /login:');
-			res.redirect('/');
+	function ensureAuthenticated(req, res, next) {
+		console.log('ensureAuthenticated:'+req.isAuthenticated());
+		
+		if (req.isAuthenticated()) { 
+			return next(); 
 		}
+		
+		res.redirect('/');
 	}
 	
 	function copyFile(req, dir, next) {
@@ -132,12 +101,12 @@ module.exports = function(app)
 	// USERS
 	
 	// page of adding new user (temporary)
-	app.get('/users/new', loadUser, function(req, res) {
+	app.get('/users/new', ensureAuthenticated, function(req, res) {
 		res.render('dev/new_user.jade',{});
 	});
 	
 	// post user`s data(add new user)
-	//app.post('/users', loadUser, function(req, res) {
+	//app.post('/users', ensureAuthenticated, function(req, res) {
 	app.post('/users', function(req, res) {
 		Users.add(req.body.user, function(err,user) {
 			// !!! add sending only public fields !!!
@@ -158,7 +127,7 @@ module.exports = function(app)
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
 						currentUser: user,
 						user: user,
-						uid: req.session.user_id,
+						uid: req.user.id,
 						lots: user_items,
 						categories: Categories.main
 					});
@@ -170,11 +139,11 @@ module.exports = function(app)
 	});
 		
 	// get page of user(edit mode or other)
-	app.get('/users/:id/:operation', loadUser, function(req, res) {
+	app.get('/users/:id/:operation', ensureAuthenticated, function(req, res) {
 		Users.findById(req.params.id, function(err, user) {
 			if (user) {
-				req.params.operation == 'edit' ? res.render( 'dev/edit_user.jade', {currentUser: user, user: user} ) 
-											   : res.render( 'dev/user.jade', {currentUser: user, user: user} );
+				req.params.operation == 'edit' ? res.render( 'dev/edit_user.jade', {currentUser: req.user, user: user} ) 
+											   : res.render( 'dev/user.jade', {currentUser: req.user, user: user} );
 			} else {
 				res.send({ status: 'ERR', msg: err.message });
 			}
@@ -182,21 +151,21 @@ module.exports = function(app)
 	});
 	
 	// put user`s data(update user)
-	app.put('/users/:id?', loadUser, function(req, res) {
+	app.put('/users/:id?', ensureAuthenticated, function(req, res) {
 		Users.updateById(req.params.id, req.body.user, function(err, user) {
 			user ? res.send(user.toObject()) : res.send( { status: 'ERR', msg: err.message } );
 		});
 	});
 	
 	// delete user by id
-	app.del('/users/:id.:format?', loadUser, function(req, res) {
+	app.del('/users/:id.:format?', ensureAuthenticated, function(req, res) {
 		Users.removeById(req.params.id, function(err, user) {
 			user ? res.send(user.toObject()) : res.send( {status: 'ERR', msg: err.message} );
 		});
 	});
 	
 	//get users in json or html
-	app.get('/users.:format?', loadUser, function(req, res) {
+	app.get('/users.:format?', ensureAuthenticated, function(req, res) {
 		Users.find({}, function(err, users) {
 			if (users) {
 				req.params.format == 'json' ? res.send(users) : res.render( 'dev/users.jade', {users: users} );
@@ -207,7 +176,7 @@ module.exports = function(app)
 	});
 	
 	// Set avatar of user (!!! PUT or PATCH) 
-	app.post('/users/:id/picture', loadUser, function(req, res) {
+	app.post('/users/:id/picture', ensureAuthenticated, function(req, res) {
 		copyFile(req, './public/i/users/', function(err, fileName) {
 			Users.updateById(req.params.id, { $set: { picture: fileName }}, function(err, user) {
 				res.send( err ? { status: 'ERR', msg: err.message } : user.toObject() );
@@ -242,17 +211,17 @@ module.exports = function(app)
 		});
 	});
 	//page of creating item
-	app.get('/items/new', loadUser, function(req, res) {
-		res.render('dev/new_item.jade', {currentUser: req.currentUser});
+	app.get('/items/new', ensureAuthenticated, function(req, res) {
+		res.render('dev/new_item.jade', {currentUser: req.user});
 		//res.render('items/new.jade', {currentUser: req.currentUser});
 	});
 	//create item
-	app.post('/items', loadUser, function(req, res) {
+	app.post('/items', ensureAuthenticated, function(req, res) {
 		
 		console.log(req.currentUser);
 		var data = req.body;
 		console.log(req.body);
-		data.user_id = req.currentUser._id;
+		data.user_id = req.user._id;
 		data.picture = 'default.jpg';// it needs to discuss !!!
 		Items.add(data, function(err,item){
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
@@ -267,21 +236,21 @@ module.exports = function(app)
 				
 				req.params.format == 'json' ? res.send(item.toObject()) 
 											: res.render('showlot.jade', {
-																			currentUser:req.session.user_name/*Fix me*/,
+																			currentUser:req.user,
 																			item: item,
 																			categories: Categories.main,
-																			uid: req.session.user_id
+																			uid: req.user && req.user.id
 																		});
 			});
 	});
 	//page of Edit
-	app.get('/items/:id/:operation?', loadUser, function(req, res, next) {
+	app.get('/items/:id/:operation?', ensureAuthenticated, function(req, res, next) {
 		Items.findById(req.params.id, function(err, item) {
 			if (!item) {
 				return next(new NotFound('Item is not found'));
 			}
 			var viewData = {
-							currentUser: req.session.user_name, 
+							currentUser: req.user, // req.user.name
 							item: item,
 							categories: Categories.main	};
 							
@@ -296,14 +265,14 @@ module.exports = function(app)
 		});
 	});
 	//update item
-	app.put('/items/:id', loadUser, function(req, res,next) {
+	app.put('/items/:id', ensureAuthenticated, function(req, res,next) {
 		Items.updateById(req.params.id, req.body, function(err, item) {
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
 	});
 	
 	// Set item`s image (!!! PUT or PATCH)
-	app.post('/items/:id/picture', loadUser, function(req, res) {
+	app.post('/items/:id/picture', ensureAuthenticated, function(req, res) {
 		copyFile(req, './public/i/lots/', function(err, fileName){
 			Items.updateById(req.params.id, { $set: { picture: fileName }, $push: { pictures: fileName }}, function(err, item) {
 				res.send( err ? { status: 'ERR', msg: err.message } : item.toObject() );
@@ -312,14 +281,14 @@ module.exports = function(app)
 	});
 	
 	// Change item`s image (!!! PUT or PATCH) - "update item" is more general but it needs to discuss
-	app.put('/items/:id/change_picture', loadUser, function(req, res) {
+	app.put('/items/:id/change_picture', ensureAuthenticated, function(req, res) {
 		Items.updateById(req.params.id, { $set: { picture: req.params.picture }}, function(err, item) {
 			res.send( err ? { status: 'ERR', msg: err.message } : item.toObject() );
 		});
 	});
 	
 	//delete item
-	app.del('/items/:id.:format?', loadUser, function(req, res,next) {
+	app.del('/items/:id.:format?', ensureAuthenticated, function(req, res,next) {
 		Items.removeById(req.params.id, function(err, item) {
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
@@ -327,10 +296,10 @@ module.exports = function(app)
 	
 	//Offers
 	//add offer
-	app.post('/offers', loadUser, function(req, res) {
+	app.post('/offers', ensureAuthenticated, function(req, res) {
 		var data = req.body.offer;
-		//data.user_id = req.currentUser.id;
-		//data.item_id = req.currentUser.id;
+		//data.user_id = req.user.id;
+		//data.item_id = req.user.id;
 		Offers.add(data, function(err,item){
 			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
@@ -345,7 +314,7 @@ module.exports = function(app)
 	*/
 	
 	//delete
-	app.del('/offers/:id', loadUser, function(req, res) {
+	app.del('/offers/:id', ensureAuthenticated, function(req, res) {
 		Offers.removeById(req.params.id, function(err, offer) {
 			offer ? res.send(offer.toObject()) : res.send({status: 'ERR', msg: err.message});
 		});
@@ -370,17 +339,17 @@ module.exports = function(app)
 		}
 	});
 	
-	//for admin => add authenticate admin...loadAdmin instead od loadUser ????
+	//for admin => add authenticate admin...loadAdmin instead od ensureAuthenticated ????
 	//page of creating category
-	app.get('/categories/new', loadUser, function(req, res) {
-		res.render('categories/new.jade', {currentUser: req.currentUser});
+	app.get('/categories/new', ensureAuthenticated, function(req, res) {
+		res.render('categories/new.jade', {currentUser: req.user});
 	});
 	//create
-	app.post('/categories.:format?', loadUser, function(req, res) {
+	app.post('/categories.:format?', ensureAuthenticated, function(req, res) {
 		Categories.add(req.body.category, function(err,c){
 			if (err) {
 				console.log('error: SAVE category is failed:' + err);
-				return res.render('categories/new.jade', {currentUser: req.currentUser, category: c});
+				return res.render('categories/new.jade', {currentUser: req.user, category: c});
 			}
 			
 			switch (req.params.format) {
@@ -402,12 +371,12 @@ module.exports = function(app)
 				Items.find({category_id:{$in:search_arr}}, function (err, items) {
 					if (err) return next(new NotFound('Items not found'));
 					res.render('category', { 
-											currentUser: req.session.user_name,
+											currentUser: req.user, //or req.user.name ???
 											categories: Categories.main,
 											subcat:subcat,
 											curcat: category,
 											items: items,
-											uid: req.session.user_id
+											uid: req.user && req.user.id
 											});
 				});
 			});

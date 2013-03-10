@@ -1,5 +1,9 @@
 var express = require('express')
-	,everyauth = require('everyauth')
+	,FACEBOOK_APP_ID = '424733187608905'
+	,FACEBOOK_APP_SECRET = '9ff74c70276c16452807c2a966f71b69'
+	,passport = require('passport')
+    ,FacebookStrategy = require('passport-facebook').Strategy
+	,LocalStrategy = require('passport-local').Strategy
 	,connect = require('connect')
 	,jade = require('jade')
 	,http 	= require('http')
@@ -7,11 +11,75 @@ var express = require('express')
 	,SessionStore = require('connect-mongo')(express)
 	,db = require('./db')();
 
+//PASSPORT
+
+// Passport session setup.
+passport.serializeUser(function(user, done) {
+	done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+	app.users.findById(id, function(err, user) {
+		done(err, user);
+	});
+});
+
+// FacebookStrategy within Passport.
+passport.use(new FacebookStrategy({
+		clientID: FACEBOOK_APP_ID,
+		clientSecret: FACEBOOK_APP_SECRET,
+		profileURL: 'https://graph.facebook.com/me?fields=id,name,picture,email',//profileFields: ['emails', 'displayName', 'photos'],
+		callbackURL: 'http://auction.vanukin.com:3000/auth/facebook/callback'
+  },
+  function(accessToken, refreshToken, profile, done) {
+    app.users.findOne( { fbAccessToken: accessToken }, 
+		function(err, user) {
+			if (err || user) {
+				console.log('The user/err has been found: ' + err + '/' + (user && user.id));
+				return done(err, user);
+			}
+			
+			var userData = {};
+			userData.name = profile._json.name;
+			userData.email = profile._json.email;
+			userData.picture = profile._json.picture.data.url;
+			userData.fbAccessToken = accessToken;
+			
+			app.users.add(userData, function(err, newUser) {
+				console.log('The user has been created: ' + newUser.id );
+				done(err, newUser);
+			});
+		}); 
+}));
+
+// LocalStrategy within Passport.
+passport.use(new LocalStrategy({
+		usernameField: 'email',
+		passwordField: 'password'
+	},
+	function(username, password, done) {
+		app.users.findOne({ email: username }, function(err, user) {
+			if ( user && user.authenticate(password) ) {
+				console.log('The user has been found: ' + user.id);
+				return done(null, user);//res.send({ status: 'OK', msg: 'login is successful', uid: user.id });
+			} else if (err) {
+				console.log("Error: "+err.message);
+				return done(err);
+			} else {
+				console.log("Invalid user. Incorrect credentials");
+				return done(null, false, { message: 'Incorrect password.' });//res.send({status: 'ERR', msg: 'Incorrect credentials'});
+			}
+		});
+	}
+));
+
 //Express
 var app = express();
 
 //helpers
 app.locals({appName: 'Auction', version: '0.1'});
+
+app.passport = passport;
 
 //db
 db.open('localhost','auction');
@@ -61,7 +129,12 @@ db.on('open', function () {
 			res.locals.flash = function() { return req.flash() };
 			next();
 		})
-		app.use(everyauth.middleware(app));
+		
+		// Initialize Passport!  Also use passport.session() middleware, 
+		// to support persistent login sessions (recommended).
+		app.use(passport.initialize());
+		app.use(passport.session());
+		
 		app.use(app.router);
 		app.use(require('stylus').middleware(__dirname + '/public'));
 		app.use(express.static(path.join(__dirname, 'public')));
@@ -85,82 +158,7 @@ db.on('open', function () {
 		console.log('Using connect %s, Express %s, Jade %s', connect.version, express.version, jade.version);
 	});
 	
-	//everyauth
-	//everyauth.helpExpress(app);
 	
-	everyauth.debug = true;
-	everyauth.facebook
-	.appId('424733187608905')
-	.scope('email')
-	.fields('id,name,email,picture')
-	.appSecret('9ff74c70276c16452807c2a966f71b69')
-	.handleAuthCallbackError( function (req, res) {
-		console.log('handleAuthCallbackError req:'+req);
-		console.log('handleAuthCallbackError res:'+res);
-	})
-	.findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
-		Users.findOne( { email: fbUserMetadata.email }, function(err, user) {
-			
-			//Data from Facebook
-			// accessToken: AAAGCSubFkUkBAGGEyCGoQJAG2TPkiH61MT2kw3YSSjxTVqZANZACkKm22ZBaMevLVY5DVo3Oi3ISCeCIzFCrAdi2Er7uRXY1ySaKnWgKAZDZD
-			// accessTokExtra: { expires: '5183505' }
-			// fbUserMetadata:{ id: '100001433488760', name: 'John', email: 'john@gmail.com', picture:{{data: {url: http://profile.fgfr.re333.jpg} }} }
-			
-			var userPromise = this.Promise();
-			
-			if (err) {
-				return userPromise.fail(err);
-			}
-			
-			if (!user) {
-				var userData = {};
-				userData.name = fbUserMetadata.name;
-				userData.email = fbUserMetadata.email;
-				userData.picture = fbUserMetadata.picture.data.url;
-				userData.token = accessToken;
-				//userData.fbData = userData;
-				app.users.add(userData, function(err,createdUser) {
-					return user ? userPromise.fulfill(createdUser) : userPromise.fail(err);
-				});
-				
-				/*
-				req.session.user_id = user.id;
-	            req.session.user_name = user.name;
-				req.currentUser = user;
-				res.send({ status: 'OK', msg: 'login is successful', uid: user.id });
-				*/
-			} 
-			
-			return userPromise.fulfill(user);
-	  }); 
-	})
-	.redirectPath('/');
-	
-	/*	
-	everyauth.everymodule.findUserById(function(userId, cb) {
-		console.log('findByUserId called');
-	});
-	*/	
-	
-	/*
-	everyauth.vkontakte
-		.appId('3403773')
-		.scope('email')
-		.fields('id,name,email')
-		.appSecret('0Tt4BcLG1ggW9FVdjkoP')
-		.scope('photo')
-		.findOrCreateUser( function (session, accessToken, accessTokenExtra, vkUserMetadata) {
-			console.log('____session');
-			console.log(session);
-			console.log('____accessToken');
-			console.log(accessToken);
-			console.log('____accessTokExtra');
-			console.log(accessTokExtra);
-			console.log('____vkUserMetadata');
-			console.log(vkUserMetadata);
-		})
-		.redirectPath('/');
-	*/
 });
 
 

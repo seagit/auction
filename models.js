@@ -55,34 +55,17 @@ function defineModels(mongoose, crypto, fn) {
 		return this._id.toHexString();
 	});
 
-	//FbData
-	FbData = new Schema({
-		email: { type: String, index: { unique: true } },
-		name:  { type: String, index: { unique: true } },
-		accessToken: String,
-		picture: String
-	});
-	
-	//vkData
-	VkData = new Schema({
-		email: { type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true } },
-		name:  { type: String, validate: [validatePresenceOf, 'a name is required'], index: { unique: true } },
-		accessToken: String,
-		picture: String
-	});
-
 	//User
 	User = new Schema({
-		email: { type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true } },
+		email: { type: String, validate: [validatePresenceOf, 'an email is required'] },
 		hashed_password: String,
 		salt: String,
-		name:  { type: String, validate: [validatePresenceOf, 'a name is required'], index: { unique: true } },
+		name:  { type: String, validate: [validatePresenceOf, 'a name is required'] },
 		location: String,
 		picture: String,
 		lastDateLogin: {type: Date},
 		isAdmin: {type : Boolean, default: false},
-		//fbData: FbData,
-		//vkData: VkData
+		fbAccessToken: String
 	});
 
 	User.virtual('id').get(function() {
@@ -108,6 +91,7 @@ function defineModels(mongoose, crypto, fn) {
 		return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
 	});
 
+	/*
 	User.pre('save', function(next) {
 		if (!validatePresenceOf(this.password)) {
 			next(new Error('Invalid password'));
@@ -115,8 +99,9 @@ function defineModels(mongoose, crypto, fn) {
 			next();
 		}
 	});
-	
+	*/
 	User.on('error', function(e){
+		console.log('User.on, error');
 		console.log(e);
 	});
 

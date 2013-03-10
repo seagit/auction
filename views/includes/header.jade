@@ -1,4 +1,7 @@
 section.login-user.container
+	- if (currentUser)
+		p= currentUser.name 
+		p= currentUser.id
 	- if (locals.hasToBeLoggedIn)
 		input#has-to-be-logged-in(type='hidden', value="yes")
 	- if (locals.uid)
@@ -8,7 +11,8 @@ section.login-user.container
 	script#logout-head(type = "text/template")
 		<a href="/users/<%= id %>"><span class="user-name"><%= name %></span></a>
 		<a id="logout-trigger" href="javascript:void(0);">Logout</a>
-	.row	
+	.row
+	
 		section.social-buttons.pull-right
 			a.btn.btn-link.fb-soc(href='/auth/facebook'): img(src='/i/fb_icon.png', alt='f')
 			a.btn.btn-link.vk-soc(href='/auth/vkontakte'): img(src='/i/vk_icon.png', alt='VK')
