@@ -125,9 +125,9 @@ module.exports = function(app)
 					}	
 					
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
-						currentUser: user,
+						currentUser: req.user,
 						user: user,
-						uid: req.user.id,
+						uid: req.user.id,//user or currentUser
 						lots: user_items,
 						categories: Categories.main
 					});
