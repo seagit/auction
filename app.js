@@ -1,8 +1,11 @@
 var express = require('express')
 	,FACEBOOK_APP_ID = '424733187608905'
 	,FACEBOOK_APP_SECRET = '9ff74c70276c16452807c2a966f71b69'
+	,VKONTAKTE_APP_ID = '3403773'
+	,VKONTAKTE_APP_SECRET = '0Tt4BcLG1ggW9FVdjkoP'
 	,passport = require('passport')
     ,FacebookStrategy = require('passport-facebook').Strategy
+	,VKontakteStrategy = require('passport-vkontakte').Strategy
 	,LocalStrategy = require('passport-local').Strategy
 	,connect = require('connect')
 	,jade = require('jade')
@@ -32,7 +35,7 @@ passport.use(new FacebookStrategy({
 		callbackURL: 'http://auction.vanukin.com:3000/auth/facebook/callback'
   },
   function(accessToken, refreshToken, profile, done) {
-    app.users.findOne( { fbAccessToken: accessToken }, 
+    app.users.findOne( { fbID: profile.id }, 
 		function(err, user) {
 			if (err || user) {
 				console.log('The user/err has been found: ' + err + '/' + (user && user.id));
@@ -43,6 +46,7 @@ passport.use(new FacebookStrategy({
 			userData.name = profile._json.name;
 			userData.email = profile._json.email;
 			userData.picture = profile._json.picture.data.url;
+			userData.fbID = profile.id;
 			userData.fbAccessToken = accessToken;
 			
 			app.users.add(userData, function(err, newUser) {
@@ -51,6 +55,38 @@ passport.use(new FacebookStrategy({
 			});
 		}); 
 }));
+
+// VKontakteStrategy within Passport.
+passport.use(new VKontakteStrategy({
+		clientID:     VKONTAKTE_APP_ID,
+		clientSecret: VKONTAKTE_APP_SECRET,
+		callbackURL:  'http://auction.vanukin.com:3000/auth/vkontakte/callback'
+	},
+	function(accessToken, refreshToken, profile, done) {
+		app.users.findOne( { vkID: profile.id }, 
+			function(err, user) {
+				if (err || user) {
+					console.log('The user/err has been found: ' + err + '/' + (user && user.id));
+					return done(err, user);
+				}
+				console.log(accessToken);
+				console.log(profile);
+				
+				var userData = {};
+				userData.name = profile.displayName;
+				userData.email = profile._json.email;
+				userData.picture = profile._json.photo;
+				userData.vkID = profile.id;
+				userData.vkAccessToken = accessToken;
+				
+				app.users.add(userData, function(err, newUser) {
+					console.log('The user has been created: ' + newUser.id);
+					done(err, newUser);
+				});
+				
+			}); 
+	}
+));
 
 // LocalStrategy within Passport.
 passport.use(new LocalStrategy({

@@ -15,6 +15,7 @@
 	 "connect-mongo" : "*",
 	 "passport": "*",
 	 "passport-facebook": "*",
-	 "passport-local": "*"
+	 "passport-local": "*",
+	 "passport-vkontakte": "*"
   }
 }

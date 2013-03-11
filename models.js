@@ -65,7 +65,10 @@ function defineModels(mongoose, crypto, fn) {
 		picture: String,
 		lastDateLogin: {type: Date},
 		isAdmin: {type : Boolean, default: false},
-		fbAccessToken: String
+		vkID: String,
+		fbID: String,
+		fbAccessToken: String,
+		vkAccessToken: String
 	});
 
 	User.virtual('id').get(function() {

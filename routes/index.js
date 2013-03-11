@@ -37,7 +37,7 @@ module.exports = function(app)
 	});
 	
 	// Passport-Local login
-	app.post('/login', passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+	app.post('/login', passport.authenticate('local', { failureRedirect: '/', failureFlash: true }),
 		function(req, res) {
 			res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
 		}
@@ -64,11 +64,21 @@ module.exports = function(app)
 		res.redirect('/');
 	});
 	
-	app.get('/search', function(req, res) {
-		res.render('search', {	title: 'Search',
-								currentUser: req.user,
-								categories: Categories.main });
-	});
+	// Passport-VKontakte login
+	app.get('/auth/vkontakte',
+		passport.authenticate('vkontakte', { scope: ['emails', 'friends'] } ),
+		function(req, res){
+			console.log("The request will be redirected to vk.com for authentication, so this function will not be called.");
+		});
+		
+	// Passport-VKontakte callback
+	app.get('/auth/vkontakte/callback', 
+		passport.authenticate('vkontakte', { failureRedirect: '/auth/vkontakte' }),
+		function(req, res) {
+			//res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
+			res.redirect('/users/'+req.user.id);
+		});
+	
 	
 	function ensureAuthenticated(req, res, next) {
 		console.log('ensureAuthenticated:'+req.isAuthenticated());
@@ -80,6 +90,14 @@ module.exports = function(app)
 		res.redirect('/');
 	}
 	
+	// search
+	app.get('/search', function(req, res) {
+		res.render('search', {	title: 'Search',
+								currentUser: req.user,
+								categories: Categories.main });
+	});
+	
+	// load picture 
 	function copyFile(req, dir, next) {
 		var tmp_path = req.files.picture.path,
 			basename = path.basename(tmp_path),
@@ -127,13 +145,13 @@ module.exports = function(app)
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
 						currentUser: req.user,
 						user: user,
-						uid: req.user.id,//user or currentUser
+						uid: req.user && req.user.id,//user or currentUser
 						lots: user_items,
 						categories: Categories.main
 					});
 				});
 			} else {
-				res.send( {status: 'ERR', msg: err.message} );
+				res.send( {status: 'ERR', msg: (err && err.message) || 'user has not been found'} );
 			}
 		});
 	});
@@ -218,13 +236,14 @@ module.exports = function(app)
 	//create item
 	app.post('/items', ensureAuthenticated, function(req, res) {
 		
-		console.log(req.currentUser);
+		console.log(req.user);
+		
 		var data = req.body;
 		console.log(req.body);
-		data.user_id = req.user._id;
+		data.user_id = req.user && req.user._id;
 		data.picture = 'default.jpg';// it needs to discuss !!!
 		Items.add(data, function(err,item){
-			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: err.message});
+			item ? res.send(item.toObject()) : res.send({status: 'ERR', msg: (err && err.message) || 'Unknown error, the item has not been found'});
 		});
 	});
 	//read item or page of item (dev)
