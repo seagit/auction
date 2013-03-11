@@ -119,7 +119,7 @@ module.exports = function(app)
 	// USERS
 	
 	// page of adding new user (temporary)
-	app.get('/users/new', ensureAuthenticated, function(req, res) {
+	app.get('/users/new', function(req, res) {
 		res.render('dev/new_user.jade',{});
 	});
 	

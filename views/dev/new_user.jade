@@ -5,16 +5,16 @@ p
 	form(method='post', action='/users')
 		.item
 			label Name(required):
-			input( name='user[name]', value=user.name || '', type='text' )
+			input( name='user[name]', value='', type='text' )
 		.item
 			label Email(required):
-			input(name='user[email]', value=user.email || '')
+			input(name='user[email]', value= '')
 		.item
 			label Password(required):
-			input(name='user[password]', value=user.password || '', type='password')
+			input(name='user[password]', value= '', type='password')
 		.item
 			label location:
-			input( name='user[location]', value=user.location || '', type='text' )
+			input( name='user[location]', value= '', type='text' )
 		.item
 		button( type='submit') Register
 h3 Register (POST with json)		
@@ -22,16 +22,16 @@ p
 	form(method='post', action='/users.json')
 		.item
 			label Name(required):
-			input( name='user[name]', value=user.name || '', type='text' )
+			input( name='user[name]', value= '', type='text' )
 		.item
 			label Email(required):
-			input(name='user[email]', value=user.email || '')
+			input(name='user[email]', value= '')
 		.item
 			label Password(required):
-			input(name='user[password]', value=user.password || '', type='password')
+			input(name='user[password]', value= '', type='password')
 		.item
 			label location:
-			input( name='user[location]', value=user.location || '', type='text' )
+			input( name='user[location]', value= '', type='text' )
 		.item
 			button( type='submit') Register		
 			
