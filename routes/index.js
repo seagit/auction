@@ -54,8 +54,8 @@ module.exports = function(app)
 	app.get('/auth/facebook/callback', 
 		passport.authenticate('facebook', { failureRedirect: '/auth/facebook' }),
 		function(req, res) {
-			res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
-			//res.redirect('/');
+			//res.send({ status: 'OK', msg: 'login is successful', uid: req.user.id });
+			res.redirect('/users/'+req.user.id);
 		}
 	);
 	// Passport Logout
