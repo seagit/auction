@@ -66,7 +66,7 @@ module.exports = function(app)
 	
 	// Passport-VKontakte login
 	app.get('/auth/vkontakte',
-		passport.authenticate('vkontakte', { scope: ['emails', 'friends'] } ),
+		passport.authenticate('vkontakte'),
 		function(req, res){
 			console.log("The request will be redirected to vk.com for authentication, so this function will not be called.");
 		});

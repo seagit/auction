@@ -31,7 +31,7 @@ passport.deserializeUser(function(id, done) {
 passport.use(new FacebookStrategy({
 		clientID: FACEBOOK_APP_ID,
 		clientSecret: FACEBOOK_APP_SECRET,
-		profileURL: 'https://graph.facebook.com/me?fields=id,name,picture,email',//profileFields: ['emails', 'displayName', 'photos'],
+		profileURL: 'https://graph.facebook.com/me?fields=id,name,picture.type(large),email',//profileFields: ['emails', 'displayName', 'photos'],
 		callbackURL: 'http://auction.vanukin.com:3000/auth/facebook/callback'
   },
   function(accessToken, refreshToken, profile, done) {
@@ -60,21 +60,24 @@ passport.use(new FacebookStrategy({
 passport.use(new VKontakteStrategy({
 		clientID:     VKONTAKTE_APP_ID,
 		clientSecret: VKONTAKTE_APP_SECRET,
+		profileFields: ['displayName', 'photo_max'],
 		callbackURL:  'http://auction.vanukin.com:3000/auth/vkontakte/callback'
 	},
 	function(accessToken, refreshToken, profile, done) {
 		app.users.findOne( { vkID: profile.id }, 
 			function(err, user) {
+				
+				//console.log(accessToken);
+				//console.log(profile);
+				
 				if (err || user) {
 					console.log('The user/err has been found: ' + err + '/' + (user && user.id));
 					return done(err, user);
 				}
-				console.log(accessToken);
-				console.log(profile);
-				
+								
 				var userData = {};
 				userData.name = profile.displayName;
-				userData.email = profile._json.email;
+				//userData.email = profile._json.email;
 				userData.picture = profile._json.photo;
 				userData.vkID = profile.id;
 				userData.vkAccessToken = accessToken;
