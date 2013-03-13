@@ -34,10 +34,11 @@ $(document).ready(function(){
 
 	$('#loginForm').modal();
 
+	//Now this code is not used because we redirect in app.get('logout')
     $('#logout-trigger').live('click', function() {
         $.ajax({
-            url: '/login',
-            type: 'DELETE',
+            url: '/logout',	// '/login'
+            type: 'GET',	// 'DEL' , commented in index.js
             success: function(data){
 	            if(data.status == 'OK') {
 		            lgview.loggedIn = false;
@@ -46,7 +47,6 @@ $(document).ready(function(){
 	            } else {
 		            console.warn(data.msg + '!');
 	            }
-
             }
         });
     });
