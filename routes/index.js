@@ -15,8 +15,7 @@ module.exports = function(app)
 	app.get('/', function(req, res) {
 		res.render('index', { title: 'Exchange auction',
 							  categories: Categories.main,
-							  currentUser: req.user,
-							  uid: req.user && req.user.id
+							  currentUser: req.user
 							});		
 	});
 	//development
@@ -29,12 +28,16 @@ module.exports = function(app)
 	});
 	
 	// Sessions
+	/*
 	app.del('/login', ensureAuthenticated, function(req, res) {
 		console.log("try to logout...");
 		var user = req.user;
 		req.logout();
-		res.send({status: 'OK', msg: 'Logout OK', currentUser: user});
+		res.redirect('/');
+		//res.send({status: 'OK', msg: 'Logout OK', currentUser: user});
+		
 	});
+	*/
 	
 	// Passport-Local login
 	app.post('/login', passport.authenticate('local', { failureRedirect: '/', failureFlash: true }),
@@ -145,7 +148,6 @@ module.exports = function(app)
 					req.params.format == 'json' ? res.send(user.toObject()) : res.render('showuser.jade', {
 						currentUser: req.user,
 						user: user,
-						uid: req.user && req.user.id,//user or currentUser
 						lots: user_items,
 						categories: Categories.main
 					});
@@ -257,8 +259,7 @@ module.exports = function(app)
 											: res.render('showlot.jade', {
 																			currentUser:req.user,
 																			item: item,
-																			categories: Categories.main,
-																			uid: req.user && req.user.id
+																			categories: Categories.main
 																		});
 			});
 	});
@@ -394,8 +395,7 @@ module.exports = function(app)
 											categories: Categories.main,
 											subcat:subcat,
 											curcat: category,
-											items: items,
-											uid: req.user && req.user.id
+											items: items
 											});
 				});
 			});
