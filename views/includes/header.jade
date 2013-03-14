@@ -1,7 +1,4 @@
 section.login-user.container
-	- if (currentUser)
-		p= currentUser.name 
-		p= currentUser.id
 	- if (locals.hasToBeLoggedIn)
 		input#has-to-be-logged-in(type='hidden', value="yes")
 	- if (currentUser && currentUser.id)

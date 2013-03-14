@@ -1,10 +1,19 @@
 extends layout
 
 block content
-	.container
+	script#lot-item(type = "text/template")
+			<section class="lot-admin">
+			<img class="lot-image" src="/i/lots/<%= lot.picture %>" alt="lot image">
+			<a href="/items/<%= lot._id %>">
+			<h3 class="lot-title">
+			<%= lot.name %>
+			</h3>
+			</a>
+			</section>
+	#search-page.container
 		.row
 			.span12
-				form(method='get', action='/items')
+				form#search-main(method='get', action='/items')
 					fieldset
 						legend Розширений пошук
 						label
@@ -29,4 +38,7 @@ block content
 						input(type='text', name='startDate', placeholder='хх-хх-хххх')
 						label до
 						input(type='text', name='startDate', placeholder='хх-хх-хххх')
-						button.btn.btn-large.btn-block.btn-primary(type='submit') Пошук
+						button.search-button-main.btn.btn-large.btn-block.btn-primary(type='submit') Пошук
+		.row
+			.span12
+				.search-results

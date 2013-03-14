@@ -65,6 +65,20 @@ $(document).ready(function(){
 		}
 
 	})
+
+	$('#search-main').ajaxForm( function(data) {
+		if(data.status && data.status == 'ERR') {
+			//nothing found
+		} else {
+			var a = data;
+			var t = _.template($('#lot-item').html());
+			var search_results_html = _.reduce(data, function(a, el) {
+				return a + t({lot: el});
+			}, '');
+			$('.search-results').html(search_results_html);
+		}
+
+	})
 	
 	
 	/*$('#new-item').ajaxForm( function(data) {
@@ -132,7 +146,7 @@ $(document).ready(function(){
 	});
 
 	var LotView = Backbone.View.extend({
-		lotTemplate: _.template($('#lot-item').html()),
+		lotTemplate: $('#lot-item').html() == undefined ? '' : _.template($('#lot-item').html()),
 		initialize: function() {
 			this.render();
 		},

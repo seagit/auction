@@ -214,6 +214,29 @@ a#next-carousel {
   clear: both;
 }
 /****************************
+ *  Search
+ * *************************/
+#search-page section.lot-admin {
+  width: 754px;
+  height: 90px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  background-color: #ddd;
+}
+#search-page section.lot-admin img.lot-image {
+  float: left;
+  width: 90px;
+  height: 90px;
+  margin-right: 24px;
+}
+#search-page section.lot-admin h3.lot-title {
+  float: left;
+  width: 640px;
+  height: 35px;
+  color: #666;
+}
+/****************************
  *  Footer
  * *************************/
 .main-footer {
