@@ -12,7 +12,9 @@ var express = require('express')
 	,http 	= require('http')
 	,path 	= require('path')
 	,SessionStore = require('connect-mongo')(express)
-	,db = require('./db')();
+	,db = require('./db')()
+	,stylus = require('stylus')
+	,nib = require('nib');
 
 //PASSPORT
 
@@ -35,7 +37,7 @@ passport.use(new FacebookStrategy({
 		callbackURL: 'http://auction.vanukin.com:3000/auth/facebook/callback'
   },
   function(accessToken, refreshToken, profile, done) {
-    app.users.findOne( { fbID: profile.id }, 
+    app.users.findOne( { fbID: profile.id },
 		function(err, user) {
 			if (err || user) {
 				console.log('The user/err has been found: ' + err + '/' + (user && user.id));
@@ -53,7 +55,7 @@ passport.use(new FacebookStrategy({
 				console.log('The user has been created: ' + newUser.id );
 				done(err, newUser);
 			});
-		}); 
+		});
 }));
 
 // VKontakteStrategy within Passport.
@@ -64,7 +66,7 @@ passport.use(new VKontakteStrategy({
 		callbackURL:  'http://auction.vanukin.com:3000/auth/vkontakte/callback'
 	},
 	function(accessToken, refreshToken, profile, done) {
-		app.users.findOne( { vkID: profile.id }, 
+		app.users.findOne( { vkID: profile.id },
 			function(err, user) {
 				
 				//console.log(accessToken);
@@ -87,7 +89,7 @@ passport.use(new VKontakteStrategy({
 					done(err, newUser);
 				});
 				
-			}); 
+			});
 	}
 ));
 
@@ -115,6 +117,18 @@ passport.use(new LocalStrategy({
 //Express
 var app = express();
 
+function compileStylus(str, path) {
+	return stylus(str)
+		.set('filename', path)
+		.set('compress', true)
+		.use(nib());
+};
+
+app.use(stylus.middleware({
+	src: __dirname + '/public',
+	compile: compileStylus
+}));
+
 //helpers
 app.locals({appName: 'Auction', version: '0.1'});
 
@@ -138,7 +152,7 @@ db.on('open', function () {
 		if (err) {
 			console.log("Refresh categories was failed: "+err);
 			return;
-		} 
+		}
 		app.locals({categories: c});
 	});
 	app.users = require('./users')(db.user);
@@ -173,9 +187,11 @@ db.on('open', function () {
 		// to support persistent login sessions (recommended).
 		app.use(passport.initialize());
 		app.use(passport.session());
+
 		
+
 		app.use(app.router);
-		app.use(require('stylus').middleware(__dirname + '/public'));
+		
 		app.use(express.static(path.join(__dirname, 'public')));
 		app.use(express.limit('1mb'));
 	});

@@ -1,38 +1,38 @@
-section.login-user.container
-	- if (locals.hasToBeLoggedIn)
-		input#has-to-be-logged-in(type='hidden', value="yes")
-	- if (currentUser && currentUser.id)
-		input#cuid(type='hidden', value="#{currentUser.id}")
-	script#login-head(type = "text/template")
-		<a id="login-trigger" href="#loginForm" role="button" data-toggle="modal">Login/Register</a>
-	script#logout-head(type = "text/template")
-		<a href="/users/<%= id %>"><span class="user-name"><%= name %></span></a>
-		<a href="/logout">Logout</a>
-		// <a id="logout-trigger" href="javascript:void(0);">Logout</a>
-	.row
-	
-		section.social-buttons.pull-right
-			a.btn.btn-link.fb-soc(href='/auth/facebook'): img(src='/i/fb_icon.png', alt='f')
-			a.btn.btn-link.vk-soc(href='/auth/vkontakte'): img(src='/i/vk_icon.png', alt='VK')
-		section#lgi-lgo.pull-right
-		#loginForm.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='obminLoginFormLable', aria-hidden='true', data-show='false')
-			include widgets/LoginFormModal
-		- if (flash.info)
-			p= flash.info
-	.navbar
-		.navbar-inner
-			.container
-				a.brand(href='/') Vse na Vse
-				form.navbar-search.pull-left
-					input#search-field.search-query.span3(type='text', placeholder='Я хочу')
-				ul.nav
-					li.span2
-						p.navbar-text &nbsp;шукати в:&nbsp;
-					li.dropdown
-						a.dropdown-toggle#categoryd(role='button', data-toggle='dropdown', data-target='#', href='#') Категорія
-							b.caret
-						ul.dropdown-menu(role='menu',aria-labelledby='categoryd')
-							- for cat in categories
-								li: a(href='/categories/#{cat._id}')= cat.name
-					li.span3
-						a.pull-right(href='/search') &nbsp;&nbsp;[Розширений пошук]
+section.page-header-wrapper
+	.header-title-wrapper
+		a(href='/')
+			img.main-logo(src='/i/vnv_logo.png')
+		.user-header-wrapper
+			.user-quick-menu
+				p.breadcrumbs Отакої >> Вихід >>
+			.user-menu
+				a.main-login-trigger Вхід на сайт&nbsp;&nbsp;
+				span або&nbsp;&nbsp;
+				a.register-trigger Регістрація&nbsp;
+				span.soc-title Вхід через:
+				a.soc-login-facebook
+				a.soc-login-vk
+	.main-search-wrapper
+		.search-form
+			form.form-inline(role="form", main-search)
+				input.search-input.form-control(type="text", placeholder='Пошук ...')
+				.categories-choice-trigger(unselectable='on') Всі категорії
+				.categories-choice.ng-cloak
+					ul.s-categories
+						li.s-category(ng-click='categorySelected($event)') Всі категорії
+						li.s-category(ng-repeat='categorie in categories', ng-click='categorySelected($event)') {{ categorie }}
+				button.btn.btn-default.search-trigger
+					span.search-label Пошук
+				.clearfix
+		.filters-form
+			form.form-inline(role="form")
+				span.header-text Показати лише:
+				.checkbox
+					label.filter-checkbox.header-text
+						input(type="checkbox")
+						&nbsp;Безкоштовні пропозиції
+				.checkbox
+					label.filter-checkbox.header-text
+						input(type="checkbox")
+						&nbsp;Поблизу дому
+.clr

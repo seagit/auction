@@ -11,6 +11,7 @@
 	 "connect": "1.8.1",
 	 "connect-flash": "*",
      "stylus": "*",
+     "nib": "*",
      "mongoose" :"*",
 	 "connect-mongo" : "*",
 	 "passport": "*",

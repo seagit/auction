@@ -1,6 +1,58 @@
 .clr
-.main-footer.container
-	.copyright
-		p obmin 2012
-	.counters
-		p 100500 upd
+.footer-info-strip
+	.footer-info-wrapper(ng-controller='footerCtrl')
+		.footer-info-article
+			h3.info-header Маєш? Міняєш!
+			p.info-article 
+				Хозяева магазина-салона по обмену вещей “Vse na Vse” создали весьма внушительную базу данных тех вещей, которые без надобности находятся у людей и которые они хотели бы обменять на более нужные им вещи.
+				Все знают, что продажа ненужной вещи, а затем покупка за вырученные деньги новой, нужной вещи – это весьма хлопотливый процесс, в результате которого теряются денежные средства.
+			p.info-article 	
+				А вот если просто поменять ненужную вам вещь на ту, которая вам действительно необходима?
+			p.info-article 
+				Эта мысль и была положена в основу нового и успешного бизнес-проекта, основанного на обмене, двух предпринимателей.
+			p.info-article 
+				Когда вы превращаете вещи в деньги, а затем деньги в новые вещи, то теряете крупные суммы. Ведь во время передачи даже абсолютно новой вещи от продавца к покупателю ее стоимость уменьшается на 25% от начальной цены. Чтобы это понять, представьте, что вы только что приобрели жидкокристаллический плазменный телевизор за немалую цену. Но уже в тот момент, когда вам на кассе пробивают чек, стоимость этого телевизора уже стала на четверть меньше. А вы его еще даже и до дома то не довезли!
+		.footer-news
+			h3.info-header Новини
+			.news-wrapper(ng-repeat='article in news', ng-class='{first: $first }')
+				p.news-date {{ article.date }}
+				h5.news-title 
+					a.news-title-link(href='javascript:;') {{ article.title }}
+				p.news-text {{ article.text }}
+		.clr
+.footer-copy-strip
+	.footer-copy-wrapper
+		.copy
+			p.copyright © Vse na Vse, 2013. Всі права захищено
+			a.email(href='mailto:info@vsensvse.com.ua') info@vsensvse.com.ua
+		.footer-categories
+			ul.cats
+				li.cat
+					a.fcat(href='javascript:;') Книги
+				li.cat
+					a.fcat(href='javascript:;') Комп`ютери
+				li.cat
+					a.fcat(href='javascript:;') Телефони, смартфони
+				li.cat
+					a.fcat(href='javascript:;') Техніка, електроніка
+			ul.cats
+				li.cat
+					a.fcat(href='javascript:;') Мода, краса
+				li.cat
+					a.fcat(href='javascript:;') Диски
+				li.cat
+					a.fcat(href='javascript:;') Все для дому
+				li.cat
+					a.fcat(href='javascript:;') Для дітей
+			ul.cats
+				li.cat
+					a.fcat(href='javascript:;') Дозвілля, відпочинок
+				li.cat
+					a.fcat(href='javascript:;') Колекціонування
+				li.cat
+					a.fcat(href='javascript:;') Авто, мото
+				li.cat
+					a.fcat(href='javascript:;') Різне
+		.vgolos
+			h5.studio-header Розробка сайту
+			a.studio-link(href='http://vgolos.com') ВГОЛОС

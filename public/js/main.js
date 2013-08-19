@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	var Vguser = Backbone.Model.extend({
+	/*var Vguser = Backbone.Model.extend({
 		url: function() {
 			return '/users/' + this.get('id') + '.json';
 		}
@@ -81,9 +81,7 @@ $(document).ready(function(){
 	})
 	
 	
-	/*$('#new-item').ajaxForm( function(data) {
-		console.log(data);
-	})*/
+	
 	
 
 	if($('#has-to-be-logged-in').val() == 'yes') {
@@ -220,7 +218,7 @@ $(document).ready(function(){
 				console.log('error occurs while deleting');
 			}
 		});
-	});
+	});*/
 });
 
 
