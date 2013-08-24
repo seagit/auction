@@ -34,17 +34,17 @@ block content
 			.adv-wrapper
 				img.adv(src='/i/adv_demo.jpg')
 			h3.soc-header Ми у соціальних мережах:
-			a.vnv-f(href='javascript:;') ВКонтакте
-			a.vnv-vk(href='javascript:;') Facebook
+			a.vnv-f(href='javascript:;') Facebook
+			a.vnv-vk(href='javascript:;') ВКонтакте
 		.main-content(ng-controller='indexCtrl')
-			.lot-wrapper(ng-repeat='lot in lots', ng-class='{forth: !(($index+1)%4) && !$first }')
+			.lot-wrapper.ng-cloak(ng-repeat='lot in lots', ng-class='{forth: !(($index+1)%4) && !$first }')
 				a.lot-image-link(href='javascript:;', ng-class='{closehome: lot.closeHome, gift: lot.gift}')
 					img.lot-image(src='{{ lot.img }}')
 				a.lot-link(href='javascript:;') {{ lot.title }}
 			.clearfix
 			.lots-finish
 			h3.latest-exchanges-header Останні успішні обміни:
-			.exchange-wrapper(ng-repeat='exchange in exchanges', ng-class='{third: !(($index+1)%3) && !$first }')
+			.exchange-wrapper.ng-cloak(ng-repeat='exchange in exchanges', ng-class='{third: !(($index+1)%3) && !$first }')
 				.lot1-wrapper
 					a.ex-lot-image-link
 						img.ex-lot-image(src='{{ exchange.lot1.img }}')
